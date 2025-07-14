@@ -29,10 +29,10 @@ const Index = () => {
               <h1 className="text-2xl font-bold text-primary">OBDExpress</h1>
             </div>
             <nav className="hidden md:flex space-x-6">
-              <button onClick={() => scrollToSection('forfaits')} className="text-muted-foreground hover:text-primary">Forfaits</button>
-              <button onClick={() => scrollToSection('zones')} className="text-muted-foreground hover:text-primary">Zones</button>
-              <button onClick={() => scrollToSection('faq')} className="text-muted-foreground hover:text-primary">FAQ</button>
-              <button onClick={() => scrollToSection('reservation')} className="text-muted-foreground hover:text-primary">Réservation</button>
+              <button onClick={() => scrollToSection('forfaits')} className="text-muted-foreground hover:text-primary transition-colors">Forfaits</button>
+              <button onClick={() => scrollToSection('zones')} className="text-muted-foreground hover:text-primary transition-colors">Zones</button>
+              <button onClick={() => scrollToSection('faq')} className="text-muted-foreground hover:text-primary transition-colors">FAQ</button>
+              <button onClick={() => scrollToSection('reservation')} className="text-muted-foreground hover:text-primary transition-colors">Réservation</button>
               <Button variant="outline" onClick={() => scrollToSection('sav')}>SAV</Button>
             </nav>
           </div>
