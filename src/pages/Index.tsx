@@ -3,19 +3,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Check, Car, Settings, Shield, Phone, Mail, MapPin } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import HowItWorks from "@/components/HowItWorks";
 import CallToAction from "@/components/CallToAction";
 import ServiceTypes from "@/components/ServiceTypes";
 import InterventionZones from "@/components/InterventionZones";
+import ReservationForm from "@/components/ReservationForm";
+import SAVForm from "@/components/SAVForm";
 
 const Index = () => {
-  const navigate = useNavigate();
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-white">
+      <header className="border-b bg-white sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -23,11 +29,11 @@ const Index = () => {
               <h1 className="text-2xl font-bold text-primary">OBDExpress</h1>
             </div>
             <nav className="hidden md:flex space-x-6">
-              <a href="#services" className="text-muted-foreground hover:text-primary">Services</a>
-              <a href="#zones" className="text-muted-foreground hover:text-primary">Zones</a>
-              <a href="#tarifs" className="text-muted-foreground hover:text-primary">Tarifs</a>
-              <a href="#contact" className="text-muted-foreground hover:text-primary">Contact</a>
-              <Button variant="outline" onClick={() => navigate('/sav')}>SAV</Button>
+              <button onClick={() => scrollToSection('forfaits')} className="text-muted-foreground hover:text-primary">Forfaits</button>
+              <button onClick={() => scrollToSection('zones')} className="text-muted-foreground hover:text-primary">Zones</button>
+              <button onClick={() => scrollToSection('faq')} className="text-muted-foreground hover:text-primary">FAQ</button>
+              <button onClick={() => scrollToSection('reservation')} className="text-muted-foreground hover:text-primary">Réservation</button>
+              <Button variant="outline" onClick={() => scrollToSection('sav')}>SAV</Button>
             </nav>
           </div>
         </div>
@@ -36,12 +42,12 @@ const Index = () => {
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-primary/10 to-secondary/10 py-16">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-4">Expert en Reprogrammation Moteur</h2>
+          <h2 className="text-4xl font-bold mb-4">Expert en Diagnostic Automobile</h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Spécialiste de la suppression FAP, EGR, AdBlue et reprogrammation moteur. 
-            Service professionnel avec garantie 2 ans.
+            Spécialiste du diagnostic OBD à domicile dans les Alpes-Maritimes. 
+            Service professionnel avec rapport détaillé et conseils techniques.
           </p>
-          <Button size="lg" onClick={() => navigate('/reservation')}>
+          <Button size="lg" onClick={() => scrollToSection('reservation')}>
             Réserver maintenant
           </Button>
         </div>
@@ -54,7 +60,7 @@ const Index = () => {
       <CallToAction />
 
       {/* Nos Forfaits */}
-      <section className="py-16">
+      <section id="forfaits" className="py-16">
         <div className="container mx-auto px-4">
           <h3 className="text-3xl font-bold text-center mb-4">Nos Forfaits Diagnostic OBD</h3>
           <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -93,7 +99,7 @@ const Index = () => {
                 </ul>
                 <Button 
                   className="w-full"
-                  onClick={() => navigate('/reservation?forfait=essentiel')}
+                  onClick={() => scrollToSection('reservation')}
                 >
                   Choisir ce forfait
                 </Button>
@@ -139,7 +145,7 @@ const Index = () => {
                 <Button 
                   className="w-full"
                   variant="secondary"
-                  onClick={() => navigate('/reservation?forfait=complet')}
+                  onClick={() => scrollToSection('reservation')}
                 >
                   Choisir ce forfait
                 </Button>
@@ -182,7 +188,7 @@ const Index = () => {
                 <Button 
                   className="w-full"
                   variant="outline"
-                  onClick={() => navigate('/reservation?forfait=premium')}
+                  onClick={() => scrollToSection('reservation')}
                 >
                   Choisir ce forfait
                 </Button>
@@ -392,6 +398,12 @@ const Index = () => {
           </Tabs>
         </div>
       </section>
+
+      {/* Reservation Form */}
+      <ReservationForm />
+
+      {/* SAV Form */}
+      <SAVForm />
 
       {/* Contact Section */}
       <section id="contact" className="py-16">
