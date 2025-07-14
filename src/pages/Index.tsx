@@ -9,6 +9,7 @@ import ServiceTypes from "@/components/ServiceTypes";
 import InterventionZones from "@/components/InterventionZones";
 import ReservationForm from "@/components/ReservationForm";
 import SAVForm from "@/components/SAVForm";
+import LinksSection from "@/components/LinksSection";
 
 const Index = () => {
   const scrollToSection = (sectionId: string) => {
@@ -32,6 +33,7 @@ const Index = () => {
               <button onClick={() => scrollToSection('forfaits')} className="text-muted-foreground hover:text-primary transition-colors">Forfaits</button>
               <button onClick={() => scrollToSection('zones')} className="text-muted-foreground hover:text-primary transition-colors">Zones</button>
               <button onClick={() => scrollToSection('faq')} className="text-muted-foreground hover:text-primary transition-colors">FAQ</button>
+              <button onClick={() => scrollToSection('liens-utiles')} className="text-muted-foreground hover:text-primary transition-colors">Liens utiles</button>
               <button onClick={() => scrollToSection('reservation')} className="text-muted-foreground hover:text-primary transition-colors">Réservation</button>
               <Button variant="outline" onClick={() => scrollToSection('sav')}>SAV</Button>
               <Button variant="default" onClick={() => window.location.href = '/admin/auth'}>Admin</Button>
@@ -405,6 +407,9 @@ const Index = () => {
 
       {/* SAV Form */}
       <SAVForm />
+
+      {/* Liens Utiles */}
+      <LinksSection />
 
       {/* Contact Section */}
       <section id="contact" className="py-16">
