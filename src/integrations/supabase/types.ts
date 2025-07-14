@@ -14,7 +14,117 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      demandes_sav: {
+        Row: {
+          created_at: string
+          description: string
+          email: string
+          fichier_url: string | null
+          id: string
+          nom: string
+          prenom: string
+          statut: string
+          sujet: string
+          telephone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          email: string
+          fichier_url?: string | null
+          id?: string
+          nom: string
+          prenom: string
+          statut?: string
+          sujet: string
+          telephone: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          email?: string
+          fichier_url?: string | null
+          id?: string
+          nom?: string
+          prenom?: string
+          statut?: string
+          sujet?: string
+          telephone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reservations: {
+        Row: {
+          adresse: string
+          annee_vehicule: number
+          code_postal: string
+          created_at: string
+          date_rdv: string | null
+          date_reservation: string
+          email: string
+          id: string
+          marque_vehicule: string
+          modele_vehicule: string
+          nom: string
+          notes: string | null
+          numero_vin: string
+          prenom: string
+          prix: number
+          statut: string
+          telephone: string
+          type_prestation: string
+          updated_at: string
+          ville: string
+        }
+        Insert: {
+          adresse: string
+          annee_vehicule: number
+          code_postal: string
+          created_at?: string
+          date_rdv?: string | null
+          date_reservation?: string
+          email: string
+          id?: string
+          marque_vehicule: string
+          modele_vehicule: string
+          nom: string
+          notes?: string | null
+          numero_vin: string
+          prenom: string
+          prix: number
+          statut?: string
+          telephone: string
+          type_prestation: string
+          updated_at?: string
+          ville: string
+        }
+        Update: {
+          adresse?: string
+          annee_vehicule?: number
+          code_postal?: string
+          created_at?: string
+          date_rdv?: string | null
+          date_reservation?: string
+          email?: string
+          id?: string
+          marque_vehicule?: string
+          modele_vehicule?: string
+          nom?: string
+          notes?: string | null
+          numero_vin?: string
+          prenom?: string
+          prix?: number
+          statut?: string
+          telephone?: string
+          type_prestation?: string
+          updated_at?: string
+          ville?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
