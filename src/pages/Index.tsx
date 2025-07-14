@@ -3,6 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Car, Settings, Shield, Phone, Mail, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import HowItWorks from "@/components/HowItWorks";
+import CallToAction from "@/components/CallToAction";
+import ServiceTypes from "@/components/ServiceTypes";
+import InterventionZones from "@/components/InterventionZones";
+import PricingSection from "@/components/PricingSection";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -62,6 +67,8 @@ const Index = () => {
             </div>
             <nav className="hidden md:flex space-x-6">
               <a href="#services" className="text-muted-foreground hover:text-primary">Services</a>
+              <a href="#zones" className="text-muted-foreground hover:text-primary">Zones</a>
+              <a href="#tarifs" className="text-muted-foreground hover:text-primary">Tarifs</a>
               <a href="#contact" className="text-muted-foreground hover:text-primary">Contact</a>
               <Button variant="outline" onClick={() => navigate('/sav')}>SAV</Button>
             </nav>
@@ -83,10 +90,21 @@ const Index = () => {
         </div>
       </section>
 
+      {/* How It Works Section */}
+      <HowItWorks />
+
+      {/* Call to Action */}
+      <CallToAction />
+
+      {/* Service Types */}
+      <div className="container mx-auto px-4">
+        <ServiceTypes />
+      </div>
+
       {/* Services Section */}
       <section id="services" className="py-16">
         <div className="container mx-auto px-4">
-          <h3 className="text-3xl font-bold text-center mb-12">Nos Services</h3>
+          <h3 className="text-3xl font-bold text-center mb-12">Nos Services de Reprogrammation</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service) => (
               <Card key={service.id} className="hover:shadow-lg transition-shadow">
@@ -124,6 +142,14 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Intervention Zones */}
+      <div className="container mx-auto px-4">
+        <InterventionZones />
+      </div>
+
+      {/* Pricing Section */}
+      <PricingSection />
 
       {/* About Section */}
       <section className="bg-muted/50 py-16">
@@ -188,7 +214,7 @@ const Index = () => {
             <div className="flex flex-col items-center">
               <Phone className="h-12 w-12 text-primary mb-4" />
               <h4 className="font-semibold mb-2">Téléphone</h4>
-              <p className="text-muted-foreground">01 23 45 67 89</p>
+              <p className="text-muted-foreground">06 46 02 24 68</p>
             </div>
             <div className="flex flex-col items-center">
               <Mail className="h-12 w-12 text-primary mb-4" />
@@ -197,8 +223,8 @@ const Index = () => {
             </div>
             <div className="flex flex-col items-center">
               <MapPin className="h-12 w-12 text-primary mb-4" />
-              <h4 className="font-semibold mb-2">Adresse</h4>
-              <p className="text-muted-foreground">123 Rue de l'Automobile<br />75000 Paris</p>
+              <h4 className="font-semibold mb-2">Zone d'intervention</h4>
+              <p className="text-muted-foreground">Antibes et alentours<br />Alpes-Maritimes (06)</p>
             </div>
           </div>
         </div>
