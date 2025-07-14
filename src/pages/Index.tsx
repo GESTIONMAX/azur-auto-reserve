@@ -6,7 +6,6 @@ import HowItWorks from "@/components/HowItWorks";
 import CallToAction from "@/components/CallToAction";
 import ServiceTypes from "@/components/ServiceTypes";
 import InterventionZones from "@/components/InterventionZones";
-import PricingSection from "@/components/PricingSection";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -200,9 +199,6 @@ const Index = () => {
       <div className="container mx-auto px-4">
         <InterventionZones />
       </div>
-
-      {/* Pricing Section */}
-      <PricingSection />
 
       {/* About Section */}
       <section className="bg-muted/50 py-16">
