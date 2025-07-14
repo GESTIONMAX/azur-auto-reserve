@@ -34,6 +34,7 @@ const Index = () => {
               <button onClick={() => scrollToSection('faq')} className="text-muted-foreground hover:text-primary transition-colors">FAQ</button>
               <button onClick={() => scrollToSection('reservation')} className="text-muted-foreground hover:text-primary transition-colors">Réservation</button>
               <Button variant="outline" onClick={() => scrollToSection('sav')}>SAV</Button>
+              <Button variant="default" onClick={() => window.location.href = '/admin/auth'}>Admin</Button>
             </nav>
           </div>
         </div>
