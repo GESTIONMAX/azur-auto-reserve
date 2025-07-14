@@ -16,24 +16,6 @@ const InterventionZones = () => {
           <p className="text-sm text-muted-foreground mt-2">Intégration carte à venir</p>
         </div>
       </div>
-      
-      <div className="max-w-xl mx-auto bg-card p-4 rounded shadow">
-        <h3 className="font-semibold mb-2">Légende</h3>
-        <ul className="text-sm space-y-1">
-          <li className="flex items-center">
-            <span className="inline-block w-4 h-4 bg-green-500 rounded-full mr-2"></span>
-            Zone standard - 99€ TTC
-          </li>
-          <li className="flex items-center">
-            <span className="inline-block w-4 h-4 bg-yellow-400 rounded-full mr-2"></span>
-            Zone étendue - 109€ TTC
-          </li>
-          <li className="flex items-center">
-            <span className="inline-block w-4 h-4 bg-red-500 rounded-full mr-2"></span>
-            Sur devis
-          </li>
-        </ul>
-      </div>
     </section>
   );
 };
