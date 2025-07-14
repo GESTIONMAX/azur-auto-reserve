@@ -11,49 +11,6 @@ import PricingSection from "@/components/PricingSection";
 const Index = () => {
   const navigate = useNavigate();
 
-  const services = [
-    {
-      id: 'suppression_fap',
-      title: 'Suppression FAP',
-      description: 'Suppression complète du filtre à particules',
-      price: 299,
-      duration: '2-3h',
-      features: ['Diagnostic complet', 'Reprogrammation moteur', 'Test sur route', 'Garantie 2 ans']
-    },
-    {
-      id: 'suppression_egr',
-      title: 'Suppression EGR',
-      description: 'Désactivation de la vanne EGR',
-      price: 249,
-      duration: '1-2h',
-      features: ['Diagnostic complet', 'Reprogrammation ECU', 'Vérification émissions', 'Garantie 2 ans']
-    },
-    {
-      id: 'suppression_adblue',
-      title: 'Suppression AdBlue',
-      description: 'Suppression système SCR AdBlue',
-      price: 399,
-      duration: '3-4h',
-      features: ['Diagnostic approfondi', 'Reprogrammation complète', 'Test performance', 'Garantie 2 ans']
-    },
-    {
-      id: 'reprogrammation_stage1',
-      title: 'Reprogrammation Stage 1',
-      description: 'Optimisation moteur niveau 1',
-      price: 349,
-      duration: '2h',
-      features: ['+15% puissance', '+20% couple', 'Économie carburant', 'Garantie 2 ans']
-    },
-    {
-      id: 'reprogrammation_stage2',
-      title: 'Reprogrammation Stage 2',
-      description: 'Optimisation moteur niveau 2',
-      price: 499,
-      duration: '3h',
-      features: ['+25% puissance', '+30% couple', 'Modifications hardwares', 'Garantie 2 ans']
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -238,48 +195,6 @@ const Index = () => {
       <div className="container mx-auto px-4">
         <ServiceTypes />
       </div>
-
-      {/* Services Section */}
-      <section id="services" className="py-16">
-        <div className="container mx-auto px-4">
-          <h3 className="text-3xl font-bold text-center mb-12">Nos diagnostic ODB à domicile</h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service) => (
-              <Card key={service.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    {service.title}
-                    <span className="text-2xl font-bold text-primary">{service.price}€</span>
-                  </CardTitle>
-                  <CardDescription>{service.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Settings className="h-4 w-4 mr-2" />
-                      Durée: {service.duration}
-                    </div>
-                    <ul className="space-y-2">
-                      {service.features.map((feature, index) => (
-                        <li key={index} className="flex items-center text-sm">
-                          <Check className="h-4 w-4 text-green-600 mr-2 flex-shrink-0" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                    <Button 
-                      className="w-full mt-4"
-                      onClick={() => navigate(`/reservation?service=${service.id}`)}
-                    >
-                      Réserver ce service
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Intervention Zones */}
       <div className="container mx-auto px-4">
