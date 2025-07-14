@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Check, Car, Settings, Shield, Phone, Mail, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import HowItWorks from "@/components/HowItWorks";
@@ -252,6 +254,142 @@ const Index = () => {
               </ol>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-2">Foire Aux Questions</h2>
+          <p className="text-muted-foreground text-center mb-12">Tout ce que vous devez savoir sur notre service de diagnostic</p>
+          
+          <Tabs defaultValue="before" className="max-w-4xl mx-auto">
+            <TabsList className="grid w-full grid-cols-3 mb-8">
+              <TabsTrigger value="before">Avant le diagnostic</TabsTrigger>
+              <TabsTrigger value="during">Pendant le diagnostic</TabsTrigger>
+              <TabsTrigger value="after">Après le diagnostic</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="before" className="space-y-4">
+              <Accordion type="single" collapsible className="space-y-4">
+                <AccordionItem value="item-1" className="border rounded-lg px-6">
+                  <AccordionTrigger className="text-left">
+                    Comment prendre rendez-vous pour un diagnostic ?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    Vous pouvez prendre rendez-vous directement en ligne via notre formulaire de réservation, par téléphone au 06 46 02 24 68, ou par WhatsApp. Nous vous proposerons plusieurs créneaux selon vos disponibilités.
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="item-2" className="border rounded-lg px-6">
+                  <AccordionTrigger className="text-left">
+                    Quels sont les délais d'intervention ?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    Nous intervenons généralement dans les 24-48h suivant votre demande. Pour les urgences, nous proposons des interventions le jour même selon disponibilité.
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="item-3" className="border rounded-lg px-6">
+                  <AccordionTrigger className="text-left">
+                    Faut-il préparer quelque chose avant votre arrivée ?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    Assurez-vous simplement que votre véhicule soit accessible et que vous ayez les clés. Aucune préparation particulière n'est nécessaire de votre part.
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="item-4" className="border rounded-lg px-6">
+                  <AccordionTrigger className="text-left">
+                    Intervenez-vous tous les jours ?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    Nous intervenons du lundi au samedi, de 8h à 19h. Les dimanches sont réservés aux urgences uniquement.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </TabsContent>
+            
+            <TabsContent value="during" className="space-y-4">
+              <Accordion type="single" collapsible className="space-y-4">
+                <AccordionItem value="item-5" className="border rounded-lg px-6">
+                  <AccordionTrigger className="text-left">
+                    Combien de temps dure un diagnostic ?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    Un diagnostic complet prend généralement entre 30 minutes et 1 heure, selon la complexité des problèmes détectés et le forfait choisi.
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="item-6" className="border rounded-lg px-6">
+                  <AccordionTrigger className="text-left">
+                    Puis-je assister au diagnostic ?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    Bien sûr ! Nous encourageons même votre présence. Nous vous expliquerons chaque étape du diagnostic et répondrons à toutes vos questions en temps réel.
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="item-7" className="border rounded-lg px-6">
+                  <AccordionTrigger className="text-left">
+                    Que se passe-t-il si aucun défaut n'est trouvé ?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    Si aucun code défaut n'est détecté, nous vous remettons quand même un rapport confirmant le bon état de votre véhicule. Le diagnostic reste facturé car le service a été réalisé.
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="item-8" className="border rounded-lg px-6">
+                  <AccordionTrigger className="text-left">
+                    Utilisez-vous du matériel professionnel ?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    Oui, nous utilisons des valises de diagnostic professionnelles de dernière génération (iCarsoft, Bosch, etc.) compatibles avec toutes les marques automobiles.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </TabsContent>
+            
+            <TabsContent value="after" className="space-y-4">
+              <Accordion type="single" collapsible className="space-y-4">
+                <AccordionItem value="item-9" className="border rounded-lg px-6">
+                  <AccordionTrigger className="text-left">
+                    Recevrai-je un rapport détaillé ?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    Oui, vous recevrez un rapport complet par email dans les 2 heures suivant l'intervention, incluant les codes défaut, leur signification et nos recommandations.
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="item-10" className="border rounded-lg px-6">
+                  <AccordionTrigger className="text-left">
+                    Proposez-vous un suivi après diagnostic ?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    Selon votre forfait, nous proposons un suivi téléphonique et la possibilité de nous recontacter pour des questions relatives au diagnostic réalisé.
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="item-11" className="border rounded-lg px-6">
+                  <AccordionTrigger className="text-left">
+                    Puis-je avoir des conseils pour le contrôle technique ?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    Absolument ! Nous vous donnons tous les conseils nécessaires pour passer votre contrôle technique sereinement et vous indiquons les réparations prioritaires si besoin.
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="item-12" className="border rounded-lg px-6">
+                  <AccordionTrigger className="text-left">
+                    Que faire si le problème persiste ?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    Si le problème persiste après effacement des codes défaut, nous vous proposons un nouveau diagnostic approfondi. Certains forfaits incluent une garantie de reprise.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </TabsContent>
+          </Tabs>
         </div>
       </section>
 
