@@ -43,13 +43,21 @@ const VehicleSelector = ({ onVehicleInfoFound }: VehicleSelectorProps) => {
       for (const url of urlsToTry) {
         try {
           console.log(`Essai avec URL: ${url}`);
+          console.log(`Essai d'appel à l'URL: ${url}`);
+          
+          // Obtenir la clé anon de Supabase pour l'authentification
+          const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vb2NjdzA4dzhnb2t3YzRva3NzODAwayIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNjU2NDQ3NDI3LCJleHAiOjE5NzIwMjM0Mjd9.IbVqy05ciU9UGswJIJEXllyO4ydLfBwNmiwAdpf7-Hc';
+          
           response = await fetch(url, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": "Bearer test-token"
+              // Utiliser à la fois Authorization Bearer et apikey pour l'authentification Supabase
+              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+              "apikey": SUPABASE_ANON_KEY,
+              "x-client-info": "VehicleSelector Component"
             },
-            body: JSON.stringify({ plate: plateNumber }),
+            body: JSON.stringify({ plaque: plateNumber }),
           });
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));

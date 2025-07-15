@@ -15,12 +15,23 @@ serve(async (req) => {
   }
 
   try {
-    const { plate } = await req.json();
-    if (!plate) {
-      throw new Error("La plaque d'immatriculation est requise.");
-    }
+    const body = await req.json();
+    // Extraire la plaque d'immatriculation de la requête
+    const plaque = body?.plaque;
 
-    // Débogage des variables d'environnement
+    if (!plaque) {
+      return new Response(
+        JSON.stringify({
+          error: "La plaque d'immatriculation est requise"
+        }),
+        {
+          status: 400,
+          headers: corsHeaders
+        }
+      );
+    }
+    
+    // Pour compatibilité avec RapidAPI qui utilise 'plaque' comme nom de paramètre
     console.log("Recherche des variables d'environnement...");
     const allEnvVars = Object.keys(Deno.env.toObject());
     console.log("Variables d'environnement disponibles:", allEnvVars);
@@ -90,7 +101,7 @@ serve(async (req) => {
     // Construire l'URL de l'API RapidAPI en suivant l'exemple exact de RapidAPI
     const apiUrl = `https://api-de-plaque-d-immatriculation-france.p.rapidapi.com/?plaque=FH-634-DO`;
     // Remplacer la plaque d'immatriculation dans l'URL avec celle fournie
-    const finalUrl = apiUrl.replace('FH-634-DO', plate);
+    const finalUrl = apiUrl.replace('FH-634-DO', plaque);
     console.log(`URL de l'API: ${finalUrl}`);
 
     // Créer les en-têtes pour l'API RapidAPI - utiliser les noms exacts des en-têtes
