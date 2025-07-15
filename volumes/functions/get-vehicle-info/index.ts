@@ -1,6 +1,4 @@
-// Ultra minimal Deno Edge Function
-Deno.serve(async (req) => {
-  return new Response(JSON.stringify({ msg: "Hello from Edge Function!" }), {
-    headers: { "Content-Type": "application/json" },
-  })
-});
+// Version absolument minimaliste
+export default async function handler(req) {
+  return new Response(JSON.stringify({ message: "Hello World" }));
+}
