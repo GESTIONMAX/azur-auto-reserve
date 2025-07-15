@@ -57,8 +57,12 @@ This project is built with:
 - Vite
 - TypeScript
 - React
+- React Router v6
+- Supabase (self-hosted)
 - shadcn-ui
 - Tailwind CSS
+- Docker
+- react-helmet-async (pour le SEO)
 
 ## How can I deploy this project?
 
@@ -71,3 +75,50 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Fonctionnalités principales
+
+### Programmatic SEO avec Supabase
+
+Ce projet implémente une approche de SEO programmatique pour générer automatiquement des landing pages par ville pour le service de diagnostic automobile à domicile.
+
+- **Table `villes`** : stocke les données spécifiques à chaque ville (méta-titres, descriptions, contenus, prix, etc.)
+- **Pages dynamiques** : générées avec React Router v6 en utilisant le composant `VilleDetail.tsx`
+- **Meta tags SEO** : implémentés avec `react-helmet-async` pour une indexation optimale par les moteurs de recherche
+- **Analytics intégrés** : compteur de visites par ville dans la base de données
+
+### Base de données Supabase auto-hébergée
+
+Le projet est connecté à une instance Supabase auto-hébergée configurée avec :
+
+- **SMTP Brevo** : pour l'envoi d'e-mails de confirmation et de notifications
+- **RLS (Row Level Security)** : pour sécuriser l'accès aux données
+- **Migrations SQL** : pour le versionnement de la base de données
+- **TypeScript types** : générés depuis le schéma Supabase
+
+Pour lancer l'instance Supabase localement :
+
+```bash
+cd supabase
+docker-compose up -d
+```
+
+L'interface d'administration sera disponible sur http://localhost:3000
+
+### Dockerisation de l'application React
+
+L'application peut être déployée via Docker pour un environnement de production :
+
+```bash
+# Construction de l'image
+docker build -t azur-auto-reserve .
+
+# Démarrage du conteneur avec les variables d'environnement
+docker run -p 8080:80 \
+  -e NEXT_PUBLIC_SUPABASE_URL=https://votre-url-supabase \
+  -e NEXT_PUBLIC_SUPABASE_ANON_KEY=votre-cle-anon \
+  -e VITE_PUBLIC_SITE_URL=https://votre-site.com \
+  azur-auto-reserve
+```
+
+L'application sera accessible sur http://localhost:8080

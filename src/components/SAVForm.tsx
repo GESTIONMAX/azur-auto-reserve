@@ -20,6 +20,7 @@ const SAVForm = () => {
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { toast } = useToast();
 
   const sujets = [
@@ -106,6 +107,9 @@ const SAVForm = () => {
       });
       setSelectedFile(null);
     } catch (error) {
+      console.error('Erreur SAV:', error);
+      const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
+      setErrorMessage(errorMsg);
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de l'envoi de votre demande.",
@@ -242,11 +246,16 @@ const SAVForm = () => {
                   )}
                 </div>
 
+                {errorMessage && (
+                <div className="bg-red-50 border border-red-200 p-4 rounded-md mb-4">
+                  <h3 className="text-red-800 font-medium mb-2">Erreur détectée:</h3>
+                  <pre className="text-red-700 text-sm whitespace-pre-wrap break-all">{errorMessage}</pre>
+                </div>
+              )}
                 <Button 
                   type="submit" 
                   className="w-full" 
                   disabled={isSubmitting}
-                  size="lg"
                 >
                   {isSubmitting ? "Envoi en cours..." : "Envoyer ma demande"}
                 </Button>

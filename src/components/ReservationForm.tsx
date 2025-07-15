@@ -5,17 +5,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Clock, MapPin, User, Car, Phone, Mail } from "lucide-react";
+import { MapPin, User, Car, Phone, Mail } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import TimeSlotSelector from "@/components/calendar/TimeSlotSelector";
+import VehicleSelector from "@/components/VehicleSelector";
 
 const ReservationForm = () => {
-  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [selectedSlotId, setSelectedSlotId] = useState<string>();
+  const [selectedStartDate, setSelectedStartDate] = useState<Date>();
+  const [selectedEndDate, setSelectedEndDate] = useState<Date>();
+  const [vehicleInfo, setVehicleInfo] = useState<any>(null);
   const [formData, setFormData] = useState({
     nom: "",
     prenom: "",
@@ -54,14 +57,33 @@ const ReservationForm = () => {
     try {
       const selectedPrestation = prestations.find(p => p.id === formData.type_prestation);
       
-      const { error } = await supabase
+      if (!selectedSlotId || !selectedStartDate) {
+        throw new Error("Veuillez sélectionner un créneau de rendez-vous disponible");
+      }
+      
+      // Étape 1 : Insérer la réservation
+      const { data: reservationData, error: reservationError } = await supabase
         .from('reservations')
         .insert({
           ...formData,
           annee_vehicule: parseInt(formData.annee_vehicule),
           prix: selectedPrestation?.price || 0,
-          date_rdv: selectedDate?.toISOString()
-        });
+          date_rdv: selectedStartDate.toISOString()
+        })
+        .select();
+        
+      if (reservationError) throw reservationError;
+      
+      // Étape 2 : Mettre à jour le créneau pour le marquer comme réservé
+      const { error: updateError } = await supabase
+        .from('disponibilites')
+        .update({
+          statut: 'reserve',
+          reservation_id: reservationData?.[0]?.id
+        })
+        .eq('id', selectedSlotId);
+        
+      if (updateError) throw updateError;
 
       if (error) throw error;
 
@@ -86,7 +108,9 @@ const ReservationForm = () => {
         type_prestation: "",
         notes: ""
       });
-      setSelectedDate(undefined);
+      setSelectedSlotId(undefined);
+      setSelectedStartDate(undefined);
+      setSelectedEndDate(undefined);
     } catch (error) {
       toast({
         title: "Erreur",
@@ -209,12 +233,32 @@ const ReservationForm = () => {
                 </div>
               </div>
 
-              {/* Informations véhicule */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
+              {/* Informations sur le véhicule */}
+              <div>
+                <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
                   <Car className="h-5 w-5" />
-                  Informations du véhicule
+                  Informations sur le véhicule
                 </h3>
+                
+                <div className="mb-6">
+                  <Label className="mb-2 block">Sélectionnez votre véhicule</Label>
+                  <VehicleSelector onVehicleInfoFound={(data) => {
+                    setVehicleInfo(data);
+                    // Extraire et mettre à jour les informations du véhicule
+                    // Ces champs dépendent de la structure de la réponse de votre API
+                    if (data && data.vehicle_data) {
+                      const vehicleData = data.vehicle_data;
+                      setFormData(prev => ({
+                        ...prev,
+                        marque_vehicule: vehicleData.make || "",
+                        modele_vehicule: vehicleData.model || "",
+                        annee_vehicule: vehicleData.year?.toString() || "",
+                        // Si vous avez le VIN dans la réponse de l'API
+                        numero_vin: vehicleData.vin || ""
+                      }));
+                    }
+                  }} />
+                </div>
                 
                 <div className="grid md:grid-cols-3 gap-4">
                   <div className="space-y-2">
@@ -239,73 +283,71 @@ const ReservationForm = () => {
                     <Label htmlFor="annee_vehicule">Année *</Label>
                     <Input
                       id="annee_vehicule"
-                      type="number"
-                      min="1990"
-                      max="2024"
                       required
                       value={formData.annee_vehicule}
                       onChange={(e) => handleInputChange("annee_vehicule", e.target.value)}
                     />
                   </div>
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="numero_vin">Numéro de châssis (VIN) *</Label>
+                <div className="mt-4 space-y-2">
+                  <Label htmlFor="numero_vin">Numéro VIN (facultatif)</Label>
                   <Input
                     id="numero_vin"
-                    required
-                    placeholder="Ex: WVWZZZ1JZ3W386752"
                     value={formData.numero_vin}
                     onChange={(e) => handleInputChange("numero_vin", e.target.value)}
+                    placeholder="Numéro d'identification du véhicule"
                   />
                 </div>
+                
+                {vehicleInfo && (
+                  <div className="mt-4 p-4 bg-blue-50 rounded-md">
+                    <p className="font-semibold mb-2">Informations du véhicule trouvées :</p>
+                    <pre className="text-xs overflow-auto max-h-40 p-2 bg-white rounded">
+                      {JSON.stringify(vehicleInfo, null, 2)}
+                    </pre>
+                  </div>
+                )}
               </div>
 
-              {/* Prestation et date */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="type_prestation">Type de prestation *</Label>
-                  <Select value={formData.type_prestation} onValueChange={(value) => handleInputChange("type_prestation", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choisissez votre forfait" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {prestations.map((prestation) => (
-                        <SelectItem key={prestation.id} value={prestation.id}>
-                          {prestation.label} - {prestation.price}€
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Date souhaitée</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !selectedDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {selectedDate ? format(selectedDate, "PPP", { locale: fr }) : "Choisir une date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={setSelectedDate}
-                        disabled={(date) => date < new Date()}
-                        initialFocus
-                        className="pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
+              {/* Prestation */}
+              <div className="space-y-2">
+                <Label htmlFor="type_prestation">Type de prestation *</Label>
+                <Select value={formData.type_prestation} onValueChange={(value) => handleInputChange("type_prestation", value)} required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choisissez votre forfait" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {prestations.map((prestation) => (
+                      <SelectItem key={prestation.id} value={prestation.id}>
+                        {prestation.label} - {prestation.price}€
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Sélecteur de créneaux */}
+              <div className="space-y-2">
+                <Label htmlFor="creneaux" className="block mb-2">Choisissez un créneau de rendez-vous *</Label>
+                <TimeSlotSelector 
+                  onSlotSelect={(slotId, startDate, endDate) => {
+                    setSelectedSlotId(slotId);
+                    setSelectedStartDate(startDate);
+                    setSelectedEndDate(endDate);
+                  }}
+                  selectedSlotId={selectedSlotId}
+                />
+                
+                {selectedStartDate && selectedEndDate && (
+                  <div className="mt-2 p-3 bg-muted rounded-md">
+                    <p className="font-medium">Créneau sélectionné :</p>
+                    <p className="text-sm">
+                      Le {format(selectedStartDate, "EEEE d MMMM yyyy", { locale: fr })} 
+                      de {format(selectedStartDate, "HH:mm", { locale: fr })} 
+                      à {format(selectedEndDate, "HH:mm", { locale: fr })}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Notes */}

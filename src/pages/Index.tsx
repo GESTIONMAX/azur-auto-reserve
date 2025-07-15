@@ -44,15 +44,29 @@ const Index = () => {
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-primary/10 to-secondary/10 py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-4">Expert en Diagnostic Automobile</h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Spécialiste du diagnostic OBD à domicile dans les Alpes-Maritimes. 
-            Service professionnel avec rapport détaillé et conseils techniques.
-          </p>
-          <Button size="lg" onClick={() => scrollToSection('reservation')}>
-            Réserver maintenant
-          </Button>
+        <div className="container mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Expert en Diagnostic Automobile</h2>
+            <p className="text-lg text-muted-foreground mb-6">
+              Spécialiste du diagnostic OBD à domicile dans les Alpes-Maritimes. 
+              Service professionnel avec rapport détaillé et conseils techniques.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button size="lg" onClick={() => scrollToSection('reservation')}>
+                Réserver maintenant
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => scrollToSection('forfaits')}>
+                Voir nos forfaits
+              </Button>
+            </div>
+          </div>
+          <div className="relative">
+            <img 
+              src="/diagnostic-automobile.webp" 
+              alt="Diagnostic automobile professionnel" 
+              className="rounded-lg shadow-lg w-full h-auto" 
+            />
+          </div>
         </div>
       </section>
 
