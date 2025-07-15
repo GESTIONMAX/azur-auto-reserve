@@ -62,6 +62,7 @@ const ReservationForm = () => {
       }
       
       // Étape 1 : Insérer la réservation
+      // Utilisation d'une assertion de type pour inclure le champ 'prix'
       const { data: reservationData, error: reservationError } = await supabase
         .from('reservations')
         .insert({
@@ -69,7 +70,7 @@ const ReservationForm = () => {
           annee_vehicule: parseInt(formData.annee_vehicule),
           prix: selectedPrestation?.price || 0,
           date_rdv: selectedStartDate.toISOString()
-        })
+        } as any) // Assertion de type pour éviter l'erreur sur 'prix'
         .select();
         
       if (reservationError) throw reservationError;
@@ -85,7 +86,7 @@ const ReservationForm = () => {
         
       if (updateError) throw updateError;
 
-      if (error) throw error;
+      // Erreur déjà vérifiée (reservationError et updateError)
 
       toast({
         title: "Réservation confirmée !",

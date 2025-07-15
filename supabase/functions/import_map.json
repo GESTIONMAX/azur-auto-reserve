@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "http/": "https://deno.land/std@0.168.0/http/",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2",
+    "cors/": "https://deno.land/x/cors@v1.2.2/"
+  }
+}
