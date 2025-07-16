@@ -10,9 +10,9 @@ services:
       - ./supabase/functions:/home/deno/functions-backup:ro
     environment:
       # Variables d'environnement Supabase
-      SUPABASE_URL: ${VITE_SUPABASE_URL}
-      SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_KEY}
+      SUPABASE_URL: ${SERVICE_FQDN_SUPABASEKONG}
+      SUPABASE_ANON_KEY: ${SERVICE_SUPABASEANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_SUPABASESERVICE_KEY}
       # Variables d'environnement RapidAPI
       RAPIDAPI_KEY: ${RAPIDAPI_KEY}
       RAPIDAPI_HOST: ${RAPIDAPI_HOST}
