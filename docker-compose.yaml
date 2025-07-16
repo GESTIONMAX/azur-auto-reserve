@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+    restart: unless-stopped
+    environment:
+      # Variable avec valeur par défaut qui sera modifiable dans l'interface Coolify
+      - VITE_SUPABASE_URL=${SERVICE_FQDN_SUPABASEKONG}
+      - VITE_SUPABASE_ANON_KEY=${SERVICE_SUPABASEANON_KEY}
+      - VITE_PUBLIC_SITE_URL=${DOMAIN:-www.obdexpress.fr}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/", "||", "exit", "0"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    labels:
+      # Labels standard Coolify
+      - coolify.managed=true
+      # Labels Traefik
+      - traefik.enable=true
+      - traefik.http.routers.frontend.rule=Host(`${DOMAIN:-www.obdexpress.fr}`)
+      - traefik.http.routers.frontend.entrypoints=websecure
+      - traefik.http.routers.frontend.tls=true
+      # Loadbalancer et port
+      - traefik.http.services.frontend.loadbalancer.server.port=80
+      # Compression pour de meilleures performances
+      - traefik.http.middlewares.frontend-compress.compress=true
+      - traefik.http.routers.frontend.middlewares=frontend-compress
