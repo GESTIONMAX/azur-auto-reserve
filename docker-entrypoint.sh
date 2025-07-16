@@ -6,19 +6,25 @@ replace_env_vars() {
   # Générer un fichier JS avec les variables d'environnement
   echo "window.env = {" > /usr/share/nginx/html/env-config.js
   
-  # Utiliser les variables VITE_ pour Supabase (format de Vite)
+  # Utiliser les variables VITE_ et les mapper aussi en NEXT_PUBLIC_ 
   if [ ! -z "$VITE_SUPABASE_URL" ]; then
     echo "  VITE_SUPABASE_URL: \"$VITE_SUPABASE_URL\"," >> /usr/share/nginx/html/env-config.js
-  fi
-  if [ ! -z "$VITE_SUPABASE_ANON_KEY" ]; then
-    echo "  VITE_SUPABASE_ANON_KEY: \"$VITE_SUPABASE_ANON_KEY\"," >> /usr/share/nginx/html/env-config.js
+    # Important: Créer NEXT_PUBLIC_ à partir de VITE_ pour la compatibilité avec le code React
+    echo "  NEXT_PUBLIC_SUPABASE_URL: \"$VITE_SUPABASE_URL\"," >> /usr/share/nginx/html/env-config.js
   fi
   
-  # Support pour les anciennes variables NEXT_PUBLIC_ (compatibilité)
-  if [ ! -z "$NEXT_PUBLIC_SUPABASE_URL" ]; then
+  if [ ! -z "$VITE_SUPABASE_ANON_KEY" ]; then
+    echo "  VITE_SUPABASE_ANON_KEY: \"$VITE_SUPABASE_ANON_KEY\"," >> /usr/share/nginx/html/env-config.js
+    # Important: Créer NEXT_PUBLIC_ à partir de VITE_ pour la compatibilité avec le code React
+    echo "  NEXT_PUBLIC_SUPABASE_ANON_KEY: \"$VITE_SUPABASE_ANON_KEY\"," >> /usr/share/nginx/html/env-config.js
+  fi
+  
+  # Support pour les variables NEXT_PUBLIC_ natives (si elles existent)
+  if [ ! -z "$NEXT_PUBLIC_SUPABASE_URL" ] && [ -z "$VITE_SUPABASE_URL" ]; then
     echo "  NEXT_PUBLIC_SUPABASE_URL: \"$NEXT_PUBLIC_SUPABASE_URL\"," >> /usr/share/nginx/html/env-config.js
   fi
-  if [ ! -z "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ]; then
+  
+  if [ ! -z "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ] && [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
     echo "  NEXT_PUBLIC_SUPABASE_ANON_KEY: \"$NEXT_PUBLIC_SUPABASE_ANON_KEY\"," >> /usr/share/nginx/html/env-config.js
   fi
   
