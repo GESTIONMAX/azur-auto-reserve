@@ -22,8 +22,8 @@ FROM nginx:stable-alpine AS production
 # Copy built assets from the build stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy custom nginx config if needed
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy custom nginx config for SPA routing
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Add runtime environment variable support with a custom entrypoint
 COPY docker-entrypoint.sh /docker-entrypoint.sh
