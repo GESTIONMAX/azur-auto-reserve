@@ -2,36 +2,37 @@ version: '3.8'
 
 services:
   edge-functions:
-    image: supabase/edge-runtime:v1.27.4
+    image: 'supabase/edge-runtime:v1.67.4'
     container_name: ${COMPOSE_PROJECT_NAME:-supabase}_edge_functions
-    restart: unless-stopped
+    restart: always
     volumes:
-      - ./volumes/functions:/home/deno/functions:ro
+      - ./supabase/functions:/home/deno/functions:ro
       - ./supabase/functions:/home/deno/functions-backup:ro
     environment:
-      # Variables d'environnement Supabase
+      # Variables d'environnement Supabase (alignées avec supabase-edge-functions)
+      JWT_SECRET: ${SERVICE_PASSWORD_JWT}
       SUPABASE_URL: ${SERVICE_FQDN_SUPABASEKONG}
       SUPABASE_ANON_KEY: ${SERVICE_SUPABASEANON_KEY}
       SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_SUPABASESERVICE_KEY}
+      SUPABASE_DB_URL: postgresql://postgres:${SERVICE_PASSWORD_POSTGRES}@${POSTGRES_HOSTNAME:-supabase-db}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-postgres}
+      VERIFY_JWT: ${FUNCTIONS_VERIFY_JWT:-false}
       # Variables d'environnement RapidAPI
       RAPIDAPI_KEY: ${RAPIDAPI_KEY}
       RAPIDAPI_HOST: ${RAPIDAPI_HOST}
-      # Variables pour le logging
-      DEBUG: "true"
+      # Paramètres de débogage
+      DEBUG: ${DEBUG:-false}
+    healthcheck:
+      test: ["CMD", "echo", "Edge Functions is healthy"]
+      timeout: 5s
+      interval: 5s
+      retries: 3
+    command: ["start", "--main-service", "/home/deno/functions/main"]
     ports:
       - "9000:9000"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
     labels:
-      # Traefik configuration
-      traefik.enable: "true"
-      traefik.http.routers.${COMPOSE_PROJECT_NAME:-edge}.rule: "Host(`${DOMAIN:-localhost}`) && PathPrefix(`/functions/v1`)"
-      traefik.http.routers.${COMPOSE_PROJECT_NAME:-edge}.entrypoints: "websecure"
-      traefik.http.routers.${COMPOSE_PROJECT_NAME:-edge}.tls.certresolver: "letsencrypt"
-      traefik.http.services.${COMPOSE_PROJECT_NAME:-edge}.loadbalancer.server.port: "9000"
-      # Ensure function is always available
-      autoheal: "true"
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-edge}.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/functions/v1`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-edge}.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-edge}.tls.certresolver=letsencrypt
+      - traefik.http.services.${COMPOSE_PROJECT_NAME:-edge}.loadbalancer.server.port=9000
+      - autoheal=true
