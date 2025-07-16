@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      # Variables d'environnement pour le frontend
+      VITE_SUPABASE_URL: ${SERVICE_FQDN_SUPABASEKONG}
+      VITE_SUPABASE_ANON_KEY: ${SERVICE_SUPABASEANON_KEY}
+      VITE_PUBLIC_SITE_URL: ${DOMAIN:-localhost}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    ports:
+      - "80:80"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur}-frontend.rule=Host(`${DOMAIN:-localhost}`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur}-frontend.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur}-frontend.tls.certresolver=letsencrypt
+      - traefik.http.services.${COMPOSE_PROJECT_NAME:-azur}-frontend.loadbalancer.server.port=80
+      - autoheal=true

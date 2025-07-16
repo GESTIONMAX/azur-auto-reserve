@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  edge-functions:
+  backend:
     image: 'supabase/edge-runtime:v1.67.4'
     container_name: ${COMPOSE_PROJECT_NAME:-supabase}_edge_functions
     restart: always
