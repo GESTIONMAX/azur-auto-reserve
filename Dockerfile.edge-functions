@@ -1,0 +1,60 @@
+FROM supabase/edge-runtime:v1.27.4
+
+# Installation des outils de diagnostic
+RUN apt-get update && apt-get install -y curl jq && apt-get clean
+
+# Créer le répertoire pour les fonctions
+WORKDIR /home/deno
+
+# Créer les répertoires de fonctions
+RUN mkdir -p /home/deno/functions/get-vehicle-info
+
+# Copier les fonctions depuis le répertoire local
+COPY ./volumes/functions/get-vehicle-info/index.ts /home/deno/functions/get-vehicle-info/
+COPY ./supabase/functions/get-vehicle-info/index.ts /home/deno/functions-backup/get-vehicle-info/
+
+# Configuration pour Deno
+COPY ./supabase/functions/import_map.json /home/deno/import_map.json
+
+# Exposer le port utilisé par Edge Functions
+EXPOSE 9000
+
+# Script pour vérifier les fichiers et démarrer la fonction
+COPY <<'EOF' /home/deno/start.sh
+#!/bin/sh
+set -e
+
+# Check si le fichier de fonction existe
+if [ -f "/home/deno/functions/get-vehicle-info/index.ts" ]; then
+  echo "Fonction trouvée à l'emplacement principal"
+  FUNCTION_PATH="/home/deno/functions/get-vehicle-info/index.ts"
+else
+  echo "Fonction non trouvée à l'emplacement principal, utilisation du backup"
+  # Copier depuis le backup si disponible
+  if [ -f "/home/deno/functions-backup/get-vehicle-info/index.ts" ]; then
+    mkdir -p /home/deno/functions/get-vehicle-info
+    cp /home/deno/functions-backup/get-vehicle-info/index.ts /home/deno/functions/get-vehicle-info/
+    FUNCTION_PATH="/home/deno/functions/get-vehicle-info/index.ts"
+    echo "Fonction copiée depuis le backup"
+  else
+    echo "ERREUR: Fonction non trouvée!"
+    exit 1
+  fi
+fi
+
+# Liste les variables d'environnement disponibles
+if [ "$DEBUG" = "true" ]; then
+  echo "Variables d'environnement disponibles:"
+  env | grep -v PASSWORD | grep -v KEY
+fi
+
+# Démarrer la fonction
+echo "Démarrage de la fonction Edge: $FUNCTION_PATH"
+exec deno run --allow-net --allow-env --allow-read --import-map=/home/deno/import_map.json "$FUNCTION_PATH"
+EOF
+
+# Rendre le script exécutable
+RUN chmod +x /home/deno/start.sh
+
+# Commande pour démarrer le runtime Edge Functions avec le script
+CMD ["/home/deno/start.sh"]
