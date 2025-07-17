@@ -1,13 +1,24 @@
 version: '3'
 
+networks:
+  traefik-public:
+    external: true
+
 services:
   app:
     build:
       context: .
-    restart: unless-stopped
+      dockerfile: Dockerfile
+      args:
+        - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+        - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+        - VITE_PUBLIC_SITE_URL=${DOMAIN:-www.obdexpress.fr}
+    networks:
+      - traefik-public
+    restart: always
     environment:
-      # Seules les variables non liées à Supabase sont définies ici
-      # Les variables Supabase sont gérées directement dans l'interface Coolify
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
       - VITE_PUBLIC_SITE_URL=${DOMAIN:-www.obdexpress.fr}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:80/", "||", "exit", "0"]
@@ -16,15 +27,16 @@ services:
       retries: 3
       start_period: 5s
     labels:
-      # Labels standard Coolify
       - coolify.managed=true
-      # Labels Traefik
+      # Configuration Traefik
       - traefik.enable=true
-      - traefik.http.routers.frontend.rule=Host(`${DOMAIN:-www.obdexpress.fr}`)
-      - traefik.http.routers.frontend.entrypoints=websecure
-      - traefik.http.routers.frontend.tls=true
-      # Loadbalancer et port
-      - traefik.http.services.frontend.loadbalancer.server.port=80
-      # Compression pour de meilleures performances
-      - traefik.http.middlewares.frontend-compress.compress=true
-      - traefik.http.routers.frontend.middlewares=frontend-compress
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur-auto-reserve}.rule=Host(`${DOMAIN:-www.obdexpress.fr}`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur-auto-reserve}.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur-auto-reserve}.tls.certresolver=letsencrypt
+      - traefik.http.services.${COMPOSE_PROJECT_NAME:-azur-auto-reserve}.loadbalancer.server.port=80
+      # Configuration pour SPA
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-azur-auto-reserve}-spa.errors.status=404
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-azur-auto-reserve}-spa.errors.service=${COMPOSE_PROJECT_NAME:-azur-auto-reserve}
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-azur-auto-reserve}-spa.errors.query=/
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-azur-auto-reserve}-compress.compress=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur-auto-reserve}.middlewares=${COMPOSE_PROJECT_NAME:-azur-auto-reserve}-spa,${COMPOSE_PROJECT_NAME:-azur-auto-reserve}-compress
