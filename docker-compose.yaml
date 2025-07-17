@@ -6,9 +6,9 @@ services:
       context: .
     restart: unless-stopped
     environment:
-      # Variable avec valeur par défaut qui sera modifiable dans l'interface Coolify
-      - VITE_SUPABASE_URL=${SERVICE_FQDN_SUPABASEKONG}
-      - VITE_SUPABASE_ANON_KEY=${SERVICE_SUPABASEANON_KEY}
+      # Variables directement définies dans l'interface Coolify
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
       - VITE_PUBLIC_SITE_URL=${DOMAIN:-www.obdexpress.fr}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:80/", "||", "exit", "0"]
