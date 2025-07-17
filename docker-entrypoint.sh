@@ -3,46 +3,103 @@ set -e
 
 # Fonction pour remplacer les variables d'environnement dans le HTML/JS
 replace_env_vars() {
+  ENV_CONFIG_FILE="/usr/share/nginx/html/env-config.js"
+  echo "[INFO] Génération du fichier $ENV_CONFIG_FILE"
+  
+  # Vérifier si les variables d'environnement Supabase sont définies
+  if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
+    echo "[WARN] VITE_SUPABASE_URL ou VITE_SUPABASE_ANON_KEY non défini!"
+    echo "[WARN] Valeurs actuelles:"
+    echo "[WARN] VITE_SUPABASE_URL=$VITE_SUPABASE_URL"
+    echo "[WARN] VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY"
+    echo "[WARN] Création d'un fichier env-config.js avec des valeurs par défaut!"
+  fi
+  
   # Générer un fichier JS avec les variables d'environnement
-  echo "window.env = {" > /usr/share/nginx/html/env-config.js
+  echo "// Configuration des variables d'environnement - généré automatiquement" > "$ENV_CONFIG_FILE"
+  echo "window.env = {" >> "$ENV_CONFIG_FILE"
   
-  # Utiliser les variables VITE_ et les mapper aussi en NEXT_PUBLIC_ 
+  # Utiliser les variables VITE_ et les mapper aussi en NEXT_PUBLIC_
+  # SUPABASE URL
   if [ ! -z "$VITE_SUPABASE_URL" ]; then
-    echo "  VITE_SUPABASE_URL: \"$VITE_SUPABASE_URL\"," >> /usr/share/nginx/html/env-config.js
-    # Important: Créer NEXT_PUBLIC_ à partir de VITE_ pour la compatibilité avec le code React
-    echo "  NEXT_PUBLIC_SUPABASE_URL: \"$VITE_SUPABASE_URL\"," >> /usr/share/nginx/html/env-config.js
+    echo "  VITE_SUPABASE_URL: \"$VITE_SUPABASE_URL\"," >> "$ENV_CONFIG_FILE"
+    echo "  NEXT_PUBLIC_SUPABASE_URL: \"$VITE_SUPABASE_URL\"," >> "$ENV_CONFIG_FILE"
+  else
+    # Valeur par défaut si absente
+    echo "  VITE_SUPABASE_URL: \"https://api.obdexpress.fr\"," >> "$ENV_CONFIG_FILE"
+    echo "  NEXT_PUBLIC_SUPABASE_URL: \"https://api.obdexpress.fr\"," >> "$ENV_CONFIG_FILE"
   fi
   
+  # SUPABASE ANON KEY
   if [ ! -z "$VITE_SUPABASE_ANON_KEY" ]; then
-    echo "  VITE_SUPABASE_ANON_KEY: \"$VITE_SUPABASE_ANON_KEY\"," >> /usr/share/nginx/html/env-config.js
-    # Important: Créer NEXT_PUBLIC_ à partir de VITE_ pour la compatibilité avec le code React
-    echo "  NEXT_PUBLIC_SUPABASE_ANON_KEY: \"$VITE_SUPABASE_ANON_KEY\"," >> /usr/share/nginx/html/env-config.js
+    echo "  VITE_SUPABASE_ANON_KEY: \"$VITE_SUPABASE_ANON_KEY\"," >> "$ENV_CONFIG_FILE"
+    echo "  NEXT_PUBLIC_SUPABASE_ANON_KEY: \"$VITE_SUPABASE_ANON_KEY\"," >> "$ENV_CONFIG_FILE"
+  else
+    # Valeur par défaut si absente
+    echo "  VITE_SUPABASE_ANON_KEY: \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc1MjY2NTg4MCwiZXhwIjo0OTA4MzM5NDgwLCJyb2xlIjoiYW5vbiJ9.vzVhy6cNeBDLCWkAZCskjTS7m7VfkuUUELc5cOH_7as\"," >> "$ENV_CONFIG_FILE"
+    echo "  NEXT_PUBLIC_SUPABASE_ANON_KEY: \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc1MjY2NTg4MCwiZXhwIjo0OTA4MzM5NDgwLCJyb2xlIjoiYW5vbiJ9.vzVhy6cNeBDLCWkAZCskjTS7m7VfkuUUELc5cOH_7as\"," >> "$ENV_CONFIG_FILE"
   fi
   
-  # Support pour les variables NEXT_PUBLIC_ natives (si elles existent)
-  if [ ! -z "$NEXT_PUBLIC_SUPABASE_URL" ] && [ -z "$VITE_SUPABASE_URL" ]; then
-    echo "  NEXT_PUBLIC_SUPABASE_URL: \"$NEXT_PUBLIC_SUPABASE_URL\"," >> /usr/share/nginx/html/env-config.js
+  # RapidAPI
+  if [ ! -z "$VITE_RAPIDAPI_KEY" ]; then
+    echo "  VITE_RAPIDAPI_KEY: \"$VITE_RAPIDAPI_KEY\"," >> "$ENV_CONFIG_FILE"
   fi
   
-  if [ ! -z "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ] && [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
-    echo "  NEXT_PUBLIC_SUPABASE_ANON_KEY: \"$NEXT_PUBLIC_SUPABASE_ANON_KEY\"," >> /usr/share/nginx/html/env-config.js
+  if [ ! -z "$VITE_RAPIDAPI_HOST" ]; then
+    echo "  VITE_RAPIDAPI_HOST: \"$VITE_RAPIDAPI_HOST\"," >> "$ENV_CONFIG_FILE"
   fi
   
-  # Ajouter d'autres variables d'environnement importantes
+  # Autres variables
   if [ ! -z "$VITE_PUBLIC_SITE_URL" ]; then
-    echo "  VITE_PUBLIC_SITE_URL: \"$VITE_PUBLIC_SITE_URL\"," >> /usr/share/nginx/html/env-config.js
+    echo "  VITE_PUBLIC_SITE_URL: \"$VITE_PUBLIC_SITE_URL\"," >> "$ENV_CONFIG_FILE"
   fi
   
   # Fermer l'objet
-  echo "};" >> /usr/share/nginx/html/env-config.js
+  echo "};" >> "$ENV_CONFIG_FILE"
   
-  # Afficher les variables pour débogage
-  echo "Variables d'environnement chargées dans env-config.js:"
-  cat /usr/share/nginx/html/env-config.js
+  # S'assurer que le fichier a les bonnes permissions
+  chmod 644 "$ENV_CONFIG_FILE"
+  
+  # Vérifier le contenu du fichier
+  echo "[INFO] Variables d'environnement chargées dans env-config.js:"
+  cat "$ENV_CONFIG_FILE"
+  
+  # Créer un .htaccess pour forcer le bon MIME type
+  echo "[INFO] Création du fichier .htaccess pour forcer le bon MIME type"
+  cat > "/usr/share/nginx/html/.htaccess" << EOF
+# Force JavaScript MIME type
+<FilesMatch "\.(js|mjs|jsx|ts|tsx)$">
+AddType text/javascript .js .mjs .jsx .ts .tsx
+</FilesMatch>
+EOF
+  
+  # Créer aussi un fichier vide main.js au cas où
+  echo "// Fichier de secours" > "/usr/share/nginx/html/main.js"
+  chmod 644 "/usr/share/nginx/html/main.js"
+}
+
+# Fonction pour vérifier les fichiers cruciaux
+check_critical_files() {
+  echo "[INFO] Vérification des fichiers critiques dans /usr/share/nginx/html:"
+  ls -la /usr/share/nginx/html/ | grep -E 'index.html|env-config.js|main|assets'
+  
+  echo "[INFO] Configuration Nginx actuelle:"
+  cat /etc/nginx/conf.d/default.conf
+  
+  echo "[INFO] Vérification des types MIME:"
+  grep -r "application/javascript" /etc/nginx/ || echo "[WARN] Types MIME JavaScript non trouvés dans la configuration nginx!"
 }
 
 # Remplacer les variables d'environnement
 replace_env_vars
 
+# Vérifier les fichiers critiques
+check_critical_files
+
+# Création d'un simple fichier test pour vérifier que le serveur fonctionne
+echo "console.log('Server is working');" > /usr/share/nginx/html/test.js
+chmod 644 /usr/share/nginx/html/test.js
+
 # Exécuter la commande passée
+echo "[INFO] Démarrage du serveur Nginx..."
 exec "$@"
