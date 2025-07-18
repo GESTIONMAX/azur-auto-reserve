@@ -109,11 +109,7 @@ const VilleDetail = () => {
               <p className="mt-2 text-gray-600">Analyse des codes défaut et diagnostic de base</p>
             </div>
             
-            <div className="border border-gray-200 rounded-lg p-6">
-              <h3 className="font-semibold text-xl mb-2">Diagnostic complet</h3>
-              <p className="text-3xl font-bold text-blue-600">{ville.prix_specifiques.diagnostic_complet}€</p>
-              <p className="mt-2 text-gray-600">Analyse approfondie et tests mécaniques</p>
-            </div>
+
             
             <div className="border border-gray-200 rounded-lg p-6">
               <h3 className="font-semibold text-xl mb-2">Diagnostic électronique</h3>
