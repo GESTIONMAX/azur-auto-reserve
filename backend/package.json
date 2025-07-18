@@ -9,7 +9,7 @@
     "supabase:types": "supabase gen types typescript --local > ./supabase/types.ts"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.51.0",
+    "@supabase/supabase-js": "^2.52.0",
     "dotenv": "^17.2.0",
     "postgres": "^3.4.7"
   },

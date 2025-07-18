@@ -4,6 +4,15 @@
 
 **URL**: https://lovable.dev/projects/53b76233-5b99-4702-866f-14528ed8cf81
 
+## Structure du projet
+
+Le projet est divisé en deux parties principales :
+
+- **`/frontend`** : Contient l'interface utilisateur React/Vite
+- **`/backend`** : Contient les fonctions Edge de Supabase et services backend
+
+Chaque dossier possède son propre README.md avec des instructions spécifiques.
+
 ## How can I edit this code?
 
 There are several ways of editing your application.
@@ -29,11 +38,35 @@ git clone <YOUR_GIT_URL>
 # Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
+# Step 3: Installation des dépendances et lancement du frontend
+cd frontend
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
+
+# Step 4: Dans un autre terminal, installation des dépendances et lancement du backend (si nécessaire)
+cd ../backend
+npm i
+supabase functions serve
+```
+
+### Utilisation avec Docker
+
+Pour démarrer l'ensemble du projet (frontend et backend) avec Docker :
+
+```sh
+docker-compose -f docker-compose.unified.yml up -d
+```
+
+Ou pour démarrer uniquement le frontend ou le backend :
+
+```sh
+# Uniquement frontend
+cd frontend
+docker-compose up -d
+
+# Uniquement backend
+cd backend
+docker-compose up -d
 ```
 
 **Edit a file directly in GitHub**
