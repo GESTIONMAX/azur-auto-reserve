@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Fonction Edge Supabase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            overflow: auto;
+            max-height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test de la fonction Edge Supabase</h1>
+    
+    <div class="form-group">
+        <label for="url">URL de la fonction:</label>
+        <select id="url">
+            <option value="https://supabasekong-mooccw08w8gokwc4okss800k.gestionmax.fr/rest/v1/rpc/get_vehicle_info">rest/v1/rpc/get_vehicle_info</option>
+            <option value="https://supabasekong-mooccw08w8gokwc4okss800k.gestionmax.fr/functions/v1/get-vehicle-info">functions/v1/get-vehicle-info</option>
+            <option value="https://supabasekong-mooccw08w8gokwc4okss800k.gestionmax.fr/functions/get-vehicle-info">functions/get-vehicle-info</option>
+            <!-- Ajouter des URL spécifiques pour Coolify/auto-hébergé -->
+            <option value="https://azur-auto-reserve-supabase-functions-10bs.gestionmax.fr/get-vehicle-info">Coolify: functions/get-vehicle-info</option>
+            <option value="https://azur-auto-reserve-supabase-functions-10bs.gestionmax.fr/rest/v1/rpc/get_vehicle_info">Coolify: rest/v1/rpc/get_vehicle_info</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="anonKey">Clé Anon Supabase:</label>
+        <input type="text" id="anonKey" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vb2NjdzA4dzhnb2t3YzRva3NzODAwayIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNjU2NDQ3NDI3LCJleHAiOjE5NzIwMjM0Mjd9.IbVqy05ciU9UGswJIJEXllyO4ydLfBwNmiwAdpf7-Hc" style="font-size: 10px;">
+    </div>
+
+    <div class="form-group">
+        <label for="plate">Plaque d'immatriculation:</label>
+        <input type="text" id="plate" placeholder="Exemple: AB123CD" value="AB123CD">
+    </div>
+
+    <div class="form-group">
+        <label for="paramName">Nom du paramètre:</label>
+        <select id="paramName">
+            <option value="plate">plate</option>
+            <option value="immatriculation">immatriculation</option>
+            <option value="plaque">plaque</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="auth">En-tête d'autorisation:</label>
+        <input type="text" id="auth" placeholder="Bearer anon" value="Bearer anon">
+    </div>
+
+    <button onclick="testFunction()">Tester la fonction</button>
+
+    <h2>Résultats:</h2>
+    <pre id="results">Les résultats apparaîtront ici...</pre>
+
+    <script>
+        async function testFunction() {
+            const url = document.getElementById('url').value;
+            const plate = document.getElementById('plate').value;
+            const paramName = document.getElementById('paramName').value;
+            const auth = document.getElementById('auth').value;
+            const results = document.getElementById('results');
+
+            // Créer un objet de paramètres
+            const params = {};
+            params[paramName] = plate;
+
+            results.textContent = `Envoi de la requête à ${url}...`;
+
+            try {
+                // Clé anon Supabase pour l'authentification
+                const SUPABASE_ANON_KEY = document.getElementById('anonKey').value;
+                
+                // Faire la requête
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'apikey': SUPABASE_ANON_KEY,
+                        'x-client-info': 'Test Page HTML'
+                    },
+                    body: JSON.stringify(params)
+                });
+
+                // Afficher le statut de la réponse
+                results.textContent = `Statut de la réponse: ${response.status} ${response.statusText}\n\n`;
+
+                try {
+                    // Tenter de lire la réponse comme JSON
+                    const data = await response.json();
+                    results.textContent += `Réponse JSON:\n${JSON.stringify(data, null, 2)}`;
+                } catch (e) {
+                    // Si ce n'est pas du JSON, afficher le texte brut
+                    const text = await response.text();
+                    results.textContent += `Réponse texte:\n${text}`;
+                }
+            } catch (error) {
+                results.textContent = `Erreur: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

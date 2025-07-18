@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      # Seules les variables non liées à Supabase sont définies ici
+      # Les variables Supabase sont gérées directement dans l'interface Coolify
+      VITE_PUBLIC_SITE_URL: ${DOMAIN:-localhost}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/", "||" , "exit", "0"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    ports:
+      - "80:80"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur}-frontend.rule=Host(`${DOMAIN:-localhost}`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur}-frontend.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur}-frontend.tls=true
+      - traefik.http.services.${COMPOSE_PROJECT_NAME:-azur}-frontend.loadbalancer.server.port=80
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-azur}-frontend-compress.compress=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur}-frontend.middlewares=${COMPOSE_PROJECT_NAME:-azur}-frontend-compress
+      - autoheal=true

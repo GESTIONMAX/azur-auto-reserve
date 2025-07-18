@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./frontend
+    restart: always
+    env_file:
+      - ./frontend/.env
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/", "||" , "exit", "0"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    ports:
+      - "80:80"
+    labels:
+      # Traefik configuration
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur}-frontend.rule=Host(`${DOMAIN:-localhost}`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur}-frontend.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur}-frontend.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur}-frontend.tls.certresolver=letsencrypt
+      - traefik.http.services.${COMPOSE_PROJECT_NAME:-azur}-frontend.loadbalancer.server.port=80
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-azur}-frontend-compress.compress=true
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-azur}-frontend-headers.headers.customResponseHeaders.X-Robots-Tag=index
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur}-frontend.middlewares=${COMPOSE_PROJECT_NAME:-azur}-frontend-compress,${COMPOSE_PROJECT_NAME:-azur}-frontend-headers
+      # Autoheal configuration
+      - autoheal=true
+      # Coolify specific labels
+      - coolify.managed=true
+      - coolify.healthcheck=enabled
+  
+  backend:
+    build: ./backend
+    container_name: ${COMPOSE_PROJECT_NAME:-azur-auto-reserve}_edge_functions
+    restart: always
+    env_file:
+      - ./backend/.env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/functions/v1/hello"]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 10s
+    ports:
+      - "9000:9000"
+    networks:
+      - traefik-public
+    depends_on:
+      - frontend
+    labels:
+      # Traefik configuration
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur-auto-reserve}-backend.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/functions/v1`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur-auto-reserve}-backend.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur-auto-reserve}-backend.tls.certresolver=letsencrypt
+      - traefik.http.services.${COMPOSE_PROJECT_NAME:-azur-auto-reserve}-backend.loadbalancer.server.port=9000
+      # Autoheal
+      - autoheal=true
+      # Coolify specific labels
+      - coolify.managed=true
+      - coolify.healthcheck=enabled
+  
+  supabase:
+    image: supabase/supabase-start:latest
+    ports:
+      - "54321:54321"
+    volumes:
+      - supabase-data:/var/lib/postgresql/data
+    env_file:
+      - ./backend/.env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:54321/rest/v1/?apikey=postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - traefik-public
+    labels:
+      # Traefik configuration
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur}-supabase.rule=Host(`supabase.${DOMAIN:-localhost}`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur}-supabase.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur}-supabase.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur}-supabase.tls.certresolver=letsencrypt
+      - traefik.http.services.${COMPOSE_PROJECT_NAME:-azur}-supabase.loadbalancer.server.port=54321
+      # Security headers
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-azur}-supabase-headers.headers.accessControlAllowMethods=GET,OPTIONS,PUT,POST,DELETE
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-azur}-supabase-headers.headers.accessControlAllowOriginList=https://${DOMAIN:-localhost}
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-azur}-supabase-headers.headers.accessControlMaxAge=100
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-azur}-supabase-headers.headers.addVaryHeader=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur}-supabase.middlewares=${COMPOSE_PROJECT_NAME:-azur}-supabase-headers
+      # Coolify specific labels
+      - coolify.managed=true
+      - coolify.healthcheck=enabled
+
+networks:
+  traefik-public:
+    external: true
+
+volumes:
+  supabase-data:

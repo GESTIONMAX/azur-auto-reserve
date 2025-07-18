@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-azur-auto-reserve}_edge_functions
+    restart: always
+    environment:
+      # Variables d'environnement Supabase
+      JWT_SECRET: ${JWT_SECRET}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      SUPABASE_DB_URL: ${SUPABASE_DB_URL}
+      # Paramètre pour vérifier JWT
+      VERIFY_JWT: ${VERIFY_JWT:-false}
+      # Variables d'environnement RapidAPI (si nécessaires)
+      RAPIDAPI_KEY: ${RAPIDAPI_KEY:-}
+      RAPIDAPI_HOST: ${RAPIDAPI_HOST:-}
+      # Paramètres de débogage
+      DEBUG: ${DEBUG:-false}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/functions/v1/hello"]
+      timeout: 5s
+      interval: 5s
+      retries: 3
+    ports:
+      - "9000:9000"
+    networks:
+      - traefik-public
+    labels:
+      # Traefik configuration
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur-auto-reserve}-backend.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/functions/v1`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur-auto-reserve}-backend.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-azur-auto-reserve}-backend.tls.certresolver=letsencrypt
+      - traefik.http.services.${COMPOSE_PROJECT_NAME:-azur-auto-reserve}-backend.loadbalancer.server.port=9000
+      # Autoheal
+      - autoheal=true
+      # Coolify specific labels
+      - coolify.managed=true
+      - coolify.healthcheck=enabled
+
+networks:
+  traefik-public:
+    external: true
