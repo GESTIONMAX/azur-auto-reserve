@@ -42,34 +42,27 @@ const Calendar: React.FC<CalendarProps> = ({
       setError(null);
       
       try {
-        // Utiliser fetch direct avec l'API REST Supabase pour éviter les problèmes de types
-        const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/disponibilites`;
-        const apiKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+        // Utiliser le client Supabase au lieu de fetch direct
+        const query = supabase
+          .from('disponibilites')
+          .select('*')
+          .order('date_debut', { ascending: true });
         
-        // Construire les paramètres de requête
-        const params = new URLSearchParams();
+        // Filtrer par disponibilité si non admin
         if (!isAdmin) {
-          params.append('statut', 'eq.disponible');
+          query.eq('statut', 'disponible');
         }
         
-        const response = await fetch(`${apiUrl}?${params.toString()}`, {
-          method: 'GET',
-          headers: {
-            'apikey': apiKey,
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        const { data, error } = await query;
         
-        if (!response.ok) {
-          throw new Error(`Erreur API: ${response.status}`);
+        if (error) {
+          console.error('Erreur Supabase:', error);
+          throw error;
         }
-        
-        const data = await response.json();
         
         if (data && isMounted) {
           try {
-            // Mapper manuellement les disponibilités en événements de calendrier
+            // Mapper les disponibilités en événements de calendrier
             const calendarEvents: CalendarEvent[] = data.map((dispo: any) => ({
               id: dispo.id,
               title: dispo.statut === 'disponible' ? 'Disponible' : 
