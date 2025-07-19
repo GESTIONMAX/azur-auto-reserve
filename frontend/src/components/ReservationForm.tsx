@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MapPin, User, Car, Phone, Mail, Loader2 } from "lucide-react";
+import GoogleAddressAutocomplete from "./GoogleAddressAutocomplete";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -101,8 +102,11 @@ const ReservationForm = () => {
             setFormData(prev => ({
               ...prev,
               ville,
-              code_postal: codePostal,
-              adresse: data.principalSubdivision ? `${data.principalSubdivision}, ${ville}` : ville
+              // Conserver le code postal existant s'il est déjà rempli et que l'API ne renvoie pas de valeur
+              code_postal: codePostal || prev.code_postal || '',
+              // Ne pas pré-remplir l'adresse d'intervention avec les informations régionales
+              // L'utilisateur doit saisir l'adresse exacte d'intervention
+              // adresse: data.principalSubdivision ? `${data.principalSubdivision}, ${ville}` : ville
             }));
             
             // Calculer le prix basé sur la ville
@@ -176,27 +180,34 @@ const ReservationForm = () => {
     console.log('Prix calculé:', currentPrice);
 
     try {
+      setIsSubmitting(true);
       // Vérification des prérequis
-      if (!selectedSlotId || !selectedStartDate || !selectedEndDate) {
-        console.error('Erreur: Aucun créneau sélectionné');
-        throw new Error("Veuillez sélectionner un créneau de rendez-vous disponible");
-      }
-      
       console.log('Vérification des prérequis OK - Début insertion réservation');
       
-      // Construction de l'objet de réservation avec données adaptées à la structure de la table Supabase
+      // S'assurer que le prix est défini (valeur par défaut de 99 si non défini)
+      const prixFinal = currentPrice || 99;
+      console.log(`Prix calculé: ${prixFinal}`);
+      
+      // Construire les données standard de la réservation
       const standardReservationFields = {
         nom: formData.nom,
         prenom: formData.prenom,
         email: formData.email,
         telephone: formData.telephone,
-        marque: formData.marque_vehicule || '',
-        modele: formData.modele_vehicule || '',
-        annee: formData.annee_vehicule || new Date().getFullYear().toString(),
-        immatriculation: vehicleInfo?.plateNumber || '',
-        vin: formData.numero_vin || '',
+        // Champs d'adresse d'intervention (pas seulement pour la géolocalisation)
+        adresse: formData.adresse || '',
+        ville: formData.ville || '',
+        code_postal: formData.code_postal || '',
+        // Information véhicule
+        marque_vehicule: formData.marque_vehicule || '',
+        modele_vehicule: formData.modele_vehicule || '',
+        annee_vehicule: formData.annee_vehicule || new Date().getFullYear().toString(),
+        numero_vin: formData.numero_vin || '',
+        // Information prestation
         type_prestation: 'essentiel', // Valeur par défaut, maintenant qu'il n'y a qu'une seule prestation
-        notes: `Adresse: ${formData.adresse || ''}, ${formData.code_postal || ''} ${formData.ville || ''}\nPrix: ${currentPrice}€\n${formData.notes || ''}`,
+        // Forcer la présence du prix et s'assurer qu'il est envoyé comme une chaîne
+        prix: String(prixFinal),
+        notes: formData.notes || '',
         statut: 'nouvelle'
       };
       
@@ -273,7 +284,6 @@ const ReservationForm = () => {
           marque_vehicule: "",
           modele_vehicule: "",
           annee_vehicule: "",
-          numero_immatriculation: "",
           numero_vin: "",
           type_prestation: "",
           notes: ""
@@ -373,18 +383,74 @@ const ReservationForm = () => {
                 </div>
               </div>
 
+              {/* Bloc Tarification et Diagnostic */}
+              <div className="bg-green-50 p-4 rounded-lg border border-green-100 mb-6">
+                <div className="flex justify-between items-center mb-3">
+                  <div>
+                    <h3 className="text-lg font-semibold">Diagnostic Automobile Essentiel</h3>
+                    <p className="text-sm text-muted-foreground">Lecture des codes défaut et diagnostic précis</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-green-600">{currentPrice} €</p>
+                    <p className="text-sm text-muted-foreground">Prix pour {formData.ville || 'votre zone'}</p>
+                  </div>
+                </div>
+                <div className="mb-3 p-2 bg-blue-50 border border-blue-100 rounded text-sm text-blue-700 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Le prix varie selon votre localisation. Utilisez le bouton ci-dessous ou saisissez votre adresse pour calculer le tarif précis.</span>
+                </div>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={getUserLocation} 
+                  className="w-full flex justify-center items-center gap-2 bg-white"
+                  disabled={isGeolocationLoading}
+                >
+                  {isGeolocationLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
+                  Utiliser ma position actuelle
+                </Button>
+              </div>
+
               {/* Adresse */}
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="adresse">Adresse d'intervention *</Label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
+                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                    <GoogleAddressAutocomplete
                       id="adresse"
                       required
                       className="pl-10"
                       value={formData.adresse}
-                      onChange={(e) => handleInputChange("adresse", e.target.value)}
+                      onChange={(value, placeDetails) => {
+                        // Mise à jour de l'adresse
+                        handleInputChange("adresse", value);
+                        
+                        // Si des détails de lieu sont disponibles, extraire ville et code postal
+                        if (placeDetails?.address_components) {
+                          let ville = '';
+                          let codePostal = '';
+                          
+                          placeDetails.address_components.forEach(component => {
+                            if (component.types.includes('locality')) {
+                              ville = component.long_name;
+                            }
+                            if (component.types.includes('postal_code')) {
+                              codePostal = component.long_name;
+                            }
+                          });
+                          
+                          // Mettre à jour ville et code postal s'ils sont disponibles
+                          if (ville) handleInputChange("ville", ville);
+                          if (codePostal) handleInputChange("code_postal", codePostal);
+                          
+                          // Mettre à jour le prix en fonction de la ville
+                          if (ville) updatePriceBasedOnLocation(ville);
+                        }
+                      }}
+                      placeholder="Saisissez l'adresse précise d'intervention"
                     />
                   </div>
                 </div>
@@ -484,37 +550,6 @@ const ReservationForm = () => {
                     </pre>
                   </div>
                 )}
-              </div>
-
-              {/* Forfait et Prix */}
-              <div className="space-y-2">
-                <div className="bg-green-50 p-4 rounded-md border border-green-200 flex flex-col md:flex-row justify-between items-center">
-                  <div>
-                    <h4 className="font-semibold text-lg mb-1">Diagnostic Automobile Essentiel</h4>
-                    <p className="text-muted-foreground">Lecture des codes défaut et diagnostic précis</p>
-                  </div>
-                  <div className="text-center mt-3 md:mt-0">
-                    <div className="text-2xl font-bold text-green-600">{currentPrice} €</div>
-                    <p className="text-xs text-muted-foreground">Prix pour {formData.ville || "votre ville"}</p>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm"
-                      className="mt-2 text-xs" 
-                      onClick={getUserLocation}
-                      disabled={isGeolocationLoading}
-                    >
-                      {isGeolocationLoading ? (
-                        <>
-                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                          Localisation...
-                        </>
-                      ) : (
-                        "Utiliser ma position actuelle"
-                      )}
-                    </Button>
-                  </div>
-                </div>
               </div>
               
               {/* Sélecteur de créneaux */}

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Google Maps</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        #map { height: 300px; margin: 20px 0; }
+        .input-field { margin-bottom: 15px; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .loading { background-color: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>Test API Google Maps</h1>
+    
+    <div id="api-status" class="status loading">Vérification du chargement de l'API...</div>
+    
+    <div class="input-field">
+        <label for="address">Tester l'autocomplétion d'adresse:</label>
+        <input type="text" id="address" placeholder="Commencez à taper une adresse...">
+    </div>
+    
+    <div id="map"></div>
+    
+    <div class="input-field">
+        <label>Logs:</label>
+        <pre id="logs" style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 200px;"></pre>
+    </div>
+    
+    <script>
+        // Fonction pour ajouter des logs
+        function addLog(message) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.textContent += `[${timestamp}] ${message}\n`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        // API Key
+        const apiKey = 'AIzaSyCnHVZhhlzGNFQf33xdLDCXKbpwO-pyDcM';
+        addLog(`Utilisation de la clé API: ${apiKey.substring(0, 10)}...`);
+        
+        // Gestionnaire d'erreurs global
+        window.addEventListener('error', function(event) {
+            if (event.filename && event.filename.includes('maps.googleapis.com')) {
+                addLog(`ERREUR: ${event.message}`);
+                document.getElementById('api-status').className = 'status error';
+                document.getElementById('api-status').textContent = 
+                    `Erreur: ${event.message}. Vérifiez la console pour plus de détails.`;
+            }
+        });
+        
+        // Callback quand l'API est chargée
+        function initMap() {
+            addLog('API Google Maps chargée avec succès!');
+            document.getElementById('api-status').className = 'status success';
+            document.getElementById('api-status').textContent = 'API chargée avec succès!';
+            
+            // Initialiser la carte
+            const map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 46.603354, lng: 1.888334 }, // Centre de la France
+                zoom: 5
+            });
+            
+            // Initialiser l'autocomplétion
+            const input = document.getElementById('address');
+            const autocomplete = new google.maps.places.Autocomplete(input, {
+                componentRestrictions: { country: 'fr' },
+                fields: ['address_components', 'formatted_address', 'geometry', 'name'],
+                types: ['address']
+            });
+            
+            // Gérer la sélection d'une adresse
+            autocomplete.addListener('place_changed', function() {
+                const place = autocomplete.getPlace();
+                addLog(`Adresse sélectionnée: ${place.formatted_address}`);
+                
+                if (place.geometry && place.geometry.location) {
+                    map.setCenter(place.geometry.location);
+                    map.setZoom(15);
+                    
+                    new google.maps.Marker({
+                        position: place.geometry.location,
+                        map: map
+                    });
+                }
+            });
+            
+            addLog('Autocomplete initialisé');
+        }
+        
+        // Chargement de l'API
+        addLog('Chargement de l\'API Google Maps...');
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`;
+        script.async = true;
+        script.defer = true;
+        script.onerror = () => {
+            addLog('Erreur lors du chargement du script Google Maps');
+            document.getElementById('api-status').className = 'status error';
+            document.getElementById('api-status').textContent = 
+                'Erreur lors du chargement du script. Vérifiez que votre clé API est correcte et que les restrictions sont bien configurées.';
+        };
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>
