@@ -24,9 +24,19 @@ const VehicleSelector = ({ onVehicleInfoFound }: VehicleSelectorProps) => {
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPlateNumber(e.target.value);
+    const newValue = e.target.value;
+    setPlateNumber(newValue);
     // Réinitialiser les erreurs quand l'utilisateur commence à saisir
     if (error) setError(null);
+    
+    // Déclencher la recherche automatique après un court délai si la plaque a au moins 5 caractères
+    if (newValue.length >= 5) {
+      const timeoutId = setTimeout(() => {
+        handleSearch(newValue);
+      }, 500); // Délai de 500ms pour éviter trop d'appels pendant la saisie
+      
+      return () => clearTimeout(timeoutId);
+    }
   };
 
   const formatLicensePlate = (plate: string): string => {
@@ -50,9 +60,8 @@ const VehicleSelector = ({ onVehicleInfoFound }: VehicleSelectorProps) => {
     return normalized;
   };
 
-  const handleSearch = async () => {
-    if (!plateNumber.trim()) {
-      setError("Veuillez entrer un numéro d'immatriculation");
+  const handleSearch = async (plate: string = plateNumber) => {
+    if (!plate.trim()) {
       return;
     }
 
@@ -161,24 +170,19 @@ const VehicleSelector = ({ onVehicleInfoFound }: VehicleSelectorProps) => {
             value={plateNumber}
             onChange={handleInputChange}
             placeholder="AB-123-CD"
-            className="flex-grow"
+            className="w-full"
             disabled={loading}
           />
-          <Button onClick={handleSearch} disabled={loading}>
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Recherche...
-              </>
-            ) : (
-              "Rechercher"
-            )}
-          </Button>
+          {loading && (
+            <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            </div>
+          )}
         </div>
       </div>
       <p className="text-xs text-muted-foreground">
-        Entrez votre plaque d'immatriculation et appuyez sur Rechercher pour compléter
-        automatiquement les informations de votre véhicule.
+        Entrez votre plaque d'immatriculation pour compléter automatiquement
+        les informations de votre véhicule.
       </p>
       {plateNumber === "AA-123-BC" && (
         <p className="text-xs text-amber-500">
