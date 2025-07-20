@@ -334,7 +334,7 @@ const ReservationForm = () => {
               {/* Informations personnelles */}
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="nom">Nom *</Label>
+                  <Label htmlFor="nom" className="flex items-center gap-1">Nom <span className="text-destructive">*</span></Label>
                   <Input
                     id="nom"
                     required
@@ -343,7 +343,7 @@ const ReservationForm = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="prenom">Prénom *</Label>
+                  <Label htmlFor="prenom" className="flex items-center gap-1">Prénom <span className="text-destructive">*</span></Label>
                   <Input
                     id="prenom"
                     required
@@ -355,7 +355,7 @@ const ReservationForm = () => {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email *</Label>
+                  <Label htmlFor="email" className="flex items-center gap-1">Email <span className="text-destructive">*</span></Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -369,7 +369,7 @@ const ReservationForm = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="telephone">Téléphone *</Label>
+                  <Label htmlFor="telephone" className="flex items-center gap-1">Téléphone <span className="text-destructive">*</span></Label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -416,7 +416,7 @@ const ReservationForm = () => {
               {/* Adresse */}
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="adresse">Adresse d'intervention *</Label>
+                  <Label htmlFor="adresse" className="flex items-center gap-1">Adresse d'intervention <span className="text-destructive">*</span></Label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
                     <GoogleAddressAutocomplete
@@ -554,7 +554,7 @@ const ReservationForm = () => {
               
               {/* Sélecteur de créneaux */}
               <div className="space-y-2">
-                <Label htmlFor="creneaux" className="block mb-2">Choisissez un créneau de rendez-vous *</Label>
+                <Label htmlFor="creneaux" className="block mb-2 flex items-center gap-1">Choisissez un créneau de rendez-vous <span className="text-destructive">*</span></Label>
                 <TimeSlotSelector 
                   onSlotSelect={(slotId, startDate, endDate) => {
                     setSelectedSlotId(slotId);

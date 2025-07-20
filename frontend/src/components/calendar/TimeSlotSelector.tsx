@@ -56,9 +56,11 @@ const TimeSlotSelector: React.FC<TimeSlotSelectorProps> = ({
           Sélectionnez un créneau disponible (en vert) dans le calendrier ci-dessous pour votre réservation.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <Calendar isAdmin={false} onEventSelect={handleEventSelect} />
+      <CardContent className="px-2 sm:px-6">
+        <div className="space-y-4 max-w-full overflow-hidden">
+          <div className="max-w-full overflow-x-auto">
+            <Calendar isAdmin={false} onEventSelect={handleEventSelect} />  
+          </div>
           
           {selectedEvent && (
             <div className="mt-4 rounded-md bg-secondary p-4">

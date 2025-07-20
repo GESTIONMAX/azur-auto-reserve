@@ -201,7 +201,7 @@ const Calendar: React.FC<CalendarProps> = ({
 
   // Rendu normal du calendrier avec les événements
   return (
-    <div className="h-[500px] w-full">
+    <div className="h-[400px] md:h-[500px] w-full overflow-hidden">
       <BigCalendar
         localizer={memoizedLocalizer}
         events={events}
@@ -212,6 +212,7 @@ const Calendar: React.FC<CalendarProps> = ({
         onSelectEvent={handleEventSelect} // Tous les utilisateurs peuvent sélectionner un événement existant
         eventPropGetter={eventStyleGetter}
         popup={true}
+        className="max-w-full"
         messages={{
           today: "Aujourd'hui",
           previous: "Précédent",
