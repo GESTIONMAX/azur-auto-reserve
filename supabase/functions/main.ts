@@ -18,36 +18,73 @@ const handler = async (req: Request) => {
   const fullPath = url.pathname;
   console.log(`Request path: ${fullPath}`);
   
-  // La fonction vindecoder peut être appelée directement
-  // ou via le chemin /functions/v1/vindecoder
+  // Déterminer quelle fonction appeler en fonction du chemin
+  const isPing = fullPath.includes('ping');
   const isVinDecoder = fullPath.includes('vindecoder');
   
   try {
-    if (isVinDecoder) {
-      console.log("Routing to vindecoder function");
-      // Vérifier d'abord si le fichier existe
+    // Test endpoint simple pour vérifier l'infrastructure
+    if (isPing) {
+      console.log("Routing to ping function");
       try {
-        // Test direct pour vérifier les variables d'environnement
-        const apiKey = Deno.env.get('VINDECODER_API_KEY');
-        const secretKey = Deno.env.get('VINDECODER_SECRET_KEY');
-        console.log(`API Key available: ${!!apiKey}, Secret Key available: ${!!secretKey}`);
+        const pingModule = await import("./ping/index.ts");
+        if (pingModule.handler && typeof pingModule.handler === 'function') {
+          console.log("Using pingModule.handler");
+          return await pingModule.handler(req);
+        } else {
+          console.log("Ping handler not found");
+          return new Response(JSON.stringify({ 
+            error: "Ping handler not found",
+            availableExports: Object.keys(pingModule)
+          }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
+      } catch (importError) {
+        console.error(`Failed to import ping module: ${importError.message}`);
+        return new Response(JSON.stringify({ 
+          error: `Failed to import ping module: ${importError.message}`
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      }
+    }
+    // Décodage VIN
+    else if (isVinDecoder) {
+      console.log("Routing to vindecoder function");
+      try {
+        // Vérification des variables d'environnement
+        const envVars = {
+          VINDECODER_API_KEY: !!Deno.env.get('VINDECODER_API_KEY'),
+          VINDECODER_SECRET_KEY: !!Deno.env.get('VINDECODER_SECRET_KEY'),
+          SUPABASE_URL: !!Deno.env.get('SUPABASE_URL'),
+          SUPABASE_SERVICE_ROLE_KEY: !!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+        };
+        console.log(`Environment variables status: ${JSON.stringify(envVars)}`);
         
         // Importer directement le module vindecoder
         const decoderModule = await import("./vindecoder/index.ts");
-        if (decoderModule.default) {
-          return await decoderModule.default(req);
-        } else if (typeof decoderModule === 'function') {
-          return await decoderModule(req);
+        console.log(`Module vindecoder loaded, exports: ${Object.keys(decoderModule).join(', ')}`);
+        
+        if (decoderModule.handler && typeof decoderModule.handler === 'function') {
+          console.log("Using decoderModule.handler");
+          return await decoderModule.handler(req);
         } else {
-          console.log("Using decoderModule.serve handler");
-          return await decoderModule.serve(req);
+          console.log("VIN decoder handler not found or not properly exported");
+          return new Response(JSON.stringify({ 
+            error: "VIN decoder handler not found or not properly exported",
+            availableExports: Object.keys(decoderModule)
+          }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
         }
       } catch (importError) {
         console.error(`Failed to import vindecoder module: ${importError.message}`);
         return new Response(JSON.stringify({ 
-          error: `Failed to import vindecoder module: ${importError.message}`,
-          path: fullPath,
-          env: Object.keys(Deno.env.toObject()).join(", ")
+          error: `Failed to import vindecoder module: ${importError.message}`
         }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" }

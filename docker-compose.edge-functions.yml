@@ -16,9 +16,11 @@ services:
       SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_SUPABASESERVICE_KEY}
       SUPABASE_DB_URL: postgresql://postgres:${SERVICE_PASSWORD_POSTGRES}@${POSTGRES_HOSTNAME:-supabase-db}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-postgres}
       VERIFY_JWT: ${FUNCTIONS_VERIFY_JWT:-false}
-      # Variables d'environnement supplémentaires peuvent être ajoutées ici
+      # Variables d'environnement pour VIN Decoder API (valeurs explicites pour éviter les erreurs)
+      VINDECODER_API_KEY: "ad0aa3a7cbb6"
+      VINDECODER_SECRET_KEY: "e8488aca0d"
       # Paramètres de débogage
-      DEBUG: ${DEBUG:-false}
+      DEBUG: true
     healthcheck:
       test: ["CMD", "echo", "Edge Functions is healthy"]
       timeout: 5s
