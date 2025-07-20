@@ -1,9 +1,7 @@
 #!/bin/sh
 set -e
 
-echo "[INFO] Démarrage du container le $(date)"
-
-# Fonction simplifiée pour générer le fichier de configuration des variables d'environnement
+# Fonction pour remplacer les variables d'environnement dans le HTML/JS
 replace_env_vars() {
   ENV_CONFIG_FILE="/usr/share/nginx/html/env-config.js"
   echo "[INFO] Génération du fichier $ENV_CONFIG_FILE"
@@ -80,18 +78,10 @@ EOF
   chmod 644 "/usr/share/nginx/html/main.js"
 }
 
-# Fonction simplifiée pour vérifier les fichiers cruciaux
+# Fonction pour vérifier les fichiers cruciaux
 check_critical_files() {
   echo "[INFO] Vérification des fichiers critiques dans /usr/share/nginx/html:"
-  ls -la /usr/share/nginx/html/
-  
-  # Vérifier la présence de index.html
-  if [ -f "/usr/share/nginx/html/index.html" ]; then
-    echo "[INFO] Le fichier index.html est présent"
-  else
-    echo "[ERROR] Le fichier index.html est ABSENT - Création d'un fichier minimal"
-    echo "<!DOCTYPE html><html><head><title>Azur Auto Reserve</title></head><body><h1>Site en maintenance</h1><p>Veuillez réessayer plus tard.</p></body></html>" > /usr/share/nginx/html/index.html
-  fi
+  ls -la /usr/share/nginx/html/ | grep -E 'index.html|env-config.js|main|assets'
 }
 
 # Remplacer les variables d'environnement
@@ -101,9 +91,5 @@ replace_env_vars
 check_critical_files
 
 # Exécuter la commande passée
-echo "[INFO] Vérification des permissions"
-chmod -R 755 /usr/share/nginx/html
-chown -R nginx:nginx /usr/share/nginx/html
-
 echo "[INFO] Démarrage du serveur Nginx..."
 exec "$@"
