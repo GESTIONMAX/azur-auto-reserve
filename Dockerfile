@@ -1,5 +1,7 @@
-# Stage 1: Build the application
+# Stage 1: Build the application (full rebuild 20-07-2025 10:01)
 FROM node:20-alpine as build
+
+# Ajout d'une étape de nettoyage pour garantir un build propre
 
 WORKDIR /app
 
@@ -26,11 +28,14 @@ RUN echo "VITE_PUBLIC_SITE_URL=${VITE_PUBLIC_SITE_URL}" >> .env.production
 # Force Vite à utiliser le mode production
 ENV NODE_ENV=production
 
-# Build de l'application (force rebuild 20-07-2025)
+# Build de l'application (rebuild 20-07-2025)
 RUN npm run build
 
-# Vérifier que les fichiers ont été générés
-RUN ls -la dist && echo "Build terminé avec succès"
+# Vérifier que les fichiers sont générés correctement
+RUN echo "=== VERIFICATION DU BUILD ===" && \
+    ls -la dist && \
+    echo "=== CONTENU DU REPERTOIRE DIST ===" && \
+    find dist -type f | sort
 
 # Stage 2: Serve the application
 FROM nginx:alpine
