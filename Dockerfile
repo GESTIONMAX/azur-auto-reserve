@@ -3,12 +3,12 @@ FROM node:20-alpine as build
 
 WORKDIR /app
 
-# Installation des dépendances
-COPY package*.json ./
+# Installation des dépendances du frontend
+COPY frontend/package*.json ./
 RUN npm ci
 
-# Copie des fichiers du projet
-COPY . .
+# Copie des fichiers du frontend uniquement
+COPY frontend/ .
 
 # Création d'un fichier .env.production avec les variables d'environnement
 ARG VITE_SUPABASE_URL
