@@ -79,8 +79,10 @@ const GoogleAddressAutocomplete = ({
     
     // Pour forcer l'utilisation de la clé API et diagnostiquer le problème
     console.log('Tentative de chargement avec clé API');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initAutocomplete`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initAutocomplete&loading=async`;
     
+    // L'attribut 'loading=async' est ajouté directement dans l'URL pour suivre les meilleures pratiques
+    // Mais nous conservons également ces attributs pour la compatibilité
     script.async = true;
     script.defer = true;
     script.onerror = (error) => {
