@@ -6,29 +6,41 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { corsHeaders } from '../_shared/cors.ts'
 import { createHash } from 'https://deno.land/std@0.119.0/hash/mod.ts';
 
-// Récupérer les variables d'environnement (à configurer dans Supabase)
-const apiKey = Deno.env.get('VINDECODER_API_KEY') || '';
-const secretKey = Deno.env.get('VINDECODER_SECRET_KEY') || '';
-const apiPrefix = 'https://api.vindecoder.eu/3.2';
-const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+// Variables d'environnement 
+// IMPORTANT: Différer l'accès aux variables d'environnement pour éviter les erreurs au chargement
+function getEnvVars() {
+  return {
+    apiKey: Deno.env.get('VINDECODER_API_KEY') || '',
+    secretKey: Deno.env.get('VINDECODER_SECRET_KEY') || '',
+    apiPrefix: 'https://api.vindecoder.eu/3.2',
+    supabaseUrl: Deno.env.get('SUPABASE_URL') || '',
+    supabaseKey: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+  };
+}
 
 // Calcul du SHA1 pour l'API VIN Decoder
-function calculateControlSum(vin: string, id: string): string {
+function calculateControlSum(vin: string, id: string, apiKey: string, secretKey: string): string {
   const data = `${vin}|${id}|${apiKey}|${secretKey}`;
-  const hash = createHash('sha1').update(data).toString();
+  console.log(`Calculating hash for: ${vin}|${id}|[API_KEY]|[SECRET]`);
+  const hash = createHash('sha1').update(data).digest('hex');
   return hash.substring(0, 10);
 }
 
-serve(async (req) => {
+// La fonction principale qui traite les requêtes
+async function handleRequest(req: Request) {
   // Gestion des requêtes OPTIONS pour CORS
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
+    // Récupérer les variables d'environnement
+    const env = getEnvVars();
+    console.log(`VINDECODER_API_KEY available: ${!!env.apiKey}`);
+    console.log(`VINDECODER_SECRET_KEY available: ${!!env.secretKey}`);
+    
     // Vérifier si les clés API sont configurées
-    if (!apiKey || !secretKey) {
+    if (!env.apiKey || !env.secretKey) {
       return new Response(
         JSON.stringify({ 
           error: 'API keys not configured. Please set VINDECODER_API_KEY and VINDECODER_SECRET_KEY in environment variables.'
@@ -41,7 +53,22 @@ serve(async (req) => {
     }
 
     // Récupérer le VIN depuis le corps de la requête
-    const { vin } = await req.json();
+    let requestData;
+    try {
+      requestData = await req.json();
+    } catch (e) {
+      console.error('Error parsing request JSON:', e);
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
+    const { vin } = requestData;
+    console.log(`Received VIN request for: ${vin}`);
     
     // Validation du VIN
     if (!vin || typeof vin !== 'string' || vin.length < 10 || vin.length > 17) {
@@ -57,12 +84,12 @@ serve(async (req) => {
     // Paramètres pour l'appel API
     const normalizedVin = vin.toUpperCase();
     const id = 'info';  // info = VIN Decode Info (liste des données disponibles)
-    const controlSum = calculateControlSum(normalizedVin, id);
+    const controlSum = calculateControlSum(normalizedVin, id, env.apiKey, env.secretKey);
     
     // Construction de l'URL de l'API
-    const apiUrl = `${apiPrefix}/${apiKey}/${controlSum}/decode/info/${normalizedVin}.json`;
+    const apiUrl = `${env.apiPrefix}/${env.apiKey}/${controlSum}/decode/info/${normalizedVin}.json`;
     
-    console.log(`Calling VIN Decoder API: ${apiUrl}`);
+    console.log(`Calling VIN Decoder API for info: ${normalizedVin}`);
     
     // Appel à l'API vindecoder.eu
     const response = await fetch(apiUrl);
@@ -78,9 +105,10 @@ serve(async (req) => {
     // Si la réponse info est OK, faire l'appel API "decode" pour obtenir les données détaillées
     if (infoData && infoData.decode) {
       const decodeId = 'decode';
-      const decodeControlSum = calculateControlSum(normalizedVin, decodeId);
-      const decodeUrl = `${apiPrefix}/${apiKey}/${decodeControlSum}/decode/${normalizedVin}.json`;
+      const decodeControlSum = calculateControlSum(normalizedVin, decodeId, env.apiKey, env.secretKey);
+      const decodeUrl = `${env.apiPrefix}/${env.apiKey}/${decodeControlSum}/decode/${normalizedVin}.json`;
       
+      console.log(`Calling VIN Decoder API for decode: ${normalizedVin}`);
       const decodeResponse = await fetch(decodeUrl);
       
       if (!decodeResponse.ok) {
@@ -126,6 +154,8 @@ serve(async (req) => {
     
   } catch (error) {
     // Gérer les erreurs
+    console.error(`Error in vindecoder handler: ${error.message}`);
+    console.error(error.stack);
     return new Response(
       JSON.stringify({ 
         error: error.message || 'An unexpected error occurred',
@@ -137,4 +167,13 @@ serve(async (req) => {
       }
     );
   }
-})
+}
+
+// Exporter la fonction serve pour compatibilité avec les Edge Functions Deno
+const handler = handleRequest;
+export { handler };
+
+// Appeler serve() uniquement quand ce fichier est exécuté directement, pas quand il est importé
+if (import.meta.main) {
+  serve(handleRequest);
+}
