@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS vehicle_info (
 CREATE INDEX IF NOT EXISTS idx_vehicle_info_plate ON vehicle_info(plate);
 
 -- Add comment to the table
-COMMENT ON TABLE vehicle_info IS 'Table to cache vehicle information from external API';
+COMMENT ON TABLE vehicle_info IS 'Table to store vehicle information';
 
 -- Create a trigger to update the updated_at field automatically
 CREATE OR REPLACE FUNCTION trigger_set_timestamp()

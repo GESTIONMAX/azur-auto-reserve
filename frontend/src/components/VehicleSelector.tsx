@@ -17,262 +17,164 @@ interface VehicleInfo {
   engine?: string;
 }
 
-// Types pour l'API RapidAPI d'immatriculation française
-interface RapidApiFrenchVehicleResponse {
-  error?: boolean;
-  code?: number;
-  message?: string;
-  query?: string;
-  country?: string;
-  data?: {
-    AAM_fg_plaque?: string;
-    AAM_fgfg?: string;
-    AAM_RASA?: any[];
-    AAM_VIN?: string;
-    AAM_sd_siv4?: string;
-    AAM_annee_de_debut_modele?: string;
-    AAM_annee_de_fin_modele?: string;
-    AAM_capacite_reservoirs?: string;
-    AAM_carrosserie?: string;
-    AAM_carrosserie_carte_grise?: string;
-    AAM_carrosserie_ce?: string;
-    AAM_categorie_vehicule?: string;
-    AAM_photo_image?: string;
-    AAM_classe_environnement_ce?: string;
-    AAM_classe_grtc?: string;
-    AAM_code_certificat_qualite_air?: string;
-    AAM_code_de_boite_de_vitesses?: string;
-    AAM_code_national?: string;
-    AAM_code_vrai?: string;
-    AAM_codes_moteur?: string[];
-    AAM_codes_vin?: string[];
-    AAM_collection?: string;
-    AAM_consommation_ex_urbaine?: string;
-    AAM_consommation_mixte?: string;
-    AAM_consommation_urbaine?: string;
-    AAM_couleur?: string;
-    AAM_cylindree_capacite?: string;
-    AAM_date_de?: string;
-    AAM_date_cg?: string;
-    AAM_date_derniere_cg?: string;
-    AAM_date_mise_en_circulation?: string;
-    AAM_date_mise_en_circulation_des?: string;
-    AAM_deposition?: string;
-    AAM_emission_co_2?: string;
-    AAM_emission_co_2_gr?: string;
-    AAM_emplacement?: string;
-    AAM_energie?: string;
-    AAM_energie_code?: string;
-    AAM_finition?: string;
-    AAM_general?: string;
-    AAM_genre?: string;
-    AAM_genre_carte_grise?: string;
-    AAM_genre_code?: string;
-    AAM_genre_euro_code?: string;
-    AAM_garantie?: string;
-    AAM_group_code?: string;
-    AAM_hauteur?: string;
-    AAM_kw_version?: string;
-    AAM_level?: string;
-    AAM_k_type?: string;
-    AAM_label?: string;
-    AAM_label_energy?: string;
-    AAM_largeur?: string;
-    AAM_longueur?: string;
-    AAM_marque?: string;
-    AAM_modele?: string;
-    AAM_mois_version?: string;
-    AAM_motorisation?: string;
-    AAM_normes_euro?: string;
-    AAM_note?: string;
-    AAM_nb_places?: string;
-    AAM_nb_portes?: string;
-    AAM_nb_version_total?: string;
-    AAM_poids_ptac?: string;
-    AAM_prix_neuf?: string;
-    AAM_prototype_version?: string;
-    AAM_ptac?: string;
-    AAM_puissance?: string;
-    AAM_puissance_commercial?: string;
-    AAM_puissance_cv?: string;
-    AAM_segment_eureka?: string;
-    AAM_serie?: string;
-    AAM_serie_age?: string;
-    AAM_style?: string;
-    AAM_transmission?: string;
-    AAM_type_mines?: string;
-    AAM_type_variante_version?: string;
-    AAM_type_version?: string;
-    AAM_variante_version?: string;
-    [key: string]: any; // Pour les autres propriétés potentielles
-  };
-}
-
 const VehicleSelector = ({ onVehicleInfoFound }: VehicleSelectorProps) => {
   const [plateNumber, setPlateNumber] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [vehicleDetails, setVehicleDetails] = useState<VehicleInfo | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Formater automatiquement la plaque au format AA-123-BC pendant la saisie
-  const formatLicensePlate = (input: string) => {
-    // On retire d'abord tout caractère non alphanumérique
-    const cleaned = input.replace(/[^A-Z0-9]/g, '');
-    
-    // Ensuite on applique le format français : AA-123-BC
-    if (cleaned.length <= 2) {
-      return cleaned;
-    } else if (cleaned.length <= 5) {
-      return `${cleaned.substring(0, 2)}-${cleaned.substring(2)}`;
-    } else {
-      return `${cleaned.substring(0, 2)}-${cleaned.substring(2, 5)}-${cleaned.substring(5, 7)}`;
-    }
-  };
-  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Convertir en majuscule et appliquer le formatage
-    const formattedValue = formatLicensePlate(e.target.value.toUpperCase());
-    setPlateNumber(formattedValue);
-  };
-  
-  // Gérer la touche Entrée pour lancer la recherche
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleGetVehicleInfo();
-    }
+    setPlateNumber(e.target.value);
+    // Réinitialiser les erreurs quand l'utilisateur commence à saisir
+    if (error) setError(null);
   };
 
-  const handleGetVehicleInfo = async () => {
+  const formatLicensePlate = (plate: string): string => {
+    // Normaliser: supprimer espaces, tirets et convertir en majuscule
+    const normalized = plate.toUpperCase().replace(/[\s-]/g, "");
+    
+    // Format SIV (post-2009): AA-123-AA
+    if (/^[A-Z]{2}\d{3}[A-Z]{2}$/.test(normalized)) {
+      return `${normalized.substring(0, 2)}-${normalized.substring(2, 5)}-${normalized.substring(5, 7)}`;
+    }
+    
+    // Format FNI (pré-2009): 123 AA 34
+    else if (/^\d{2,4}[A-Z]{2}\d{2}$/.test(normalized)) {
+      const dept = normalized.slice(-2);
+      const letters = normalized.slice(-4, -2);
+      const numbers = normalized.slice(0, -4);
+      return `${numbers} ${letters} ${dept}`;
+    }
+    
+    // Autre format ou format non reconnu
+    return normalized;
+  };
+
+  const handleSearch = async () => {
     if (!plateNumber.trim()) {
-      toast({
-        title: "Attention",
-        description: "Veuillez entrer une plaque d'immatriculation.",
-        variant: "destructive"
-      });
+      setError("Veuillez entrer un numéro d'immatriculation");
       return;
     }
 
-    setIsLoading(true);
-    
+    setLoading(true);
+    setError(null);
+
     try {
       // Format de la plaque: conserver le format avec tirets (AA-123-BC)
       const formattedPlate = plateNumber.trim();
       
-      console.log(`Recherche du véhicule avec plaque: ${formattedPlate}`);
+      console.log(`Simulation de recherche du véhicule avec plaque: ${formattedPlate}`);
       
-      // Récupération des variables d'environnement
-      const apiKey = import.meta.env.VITE_RAPIDAPI_KEY;
-      const apiHost = import.meta.env.VITE_RAPIDAPI_HOST;
-      const apiToken = import.meta.env.VITE_RAPIDAPI_TOKEN || 'TokenDemoRapidapi';
+      // Simuler un délai de chargement pour une meilleure expérience utilisateur
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      if (!apiKey || !apiHost) {
-        throw new Error("Les clés d'API RapidAPI ne sont pas configurées.");
-      }
+      // Générer des données simulées basées sur la plaque d'immatriculation
+      const vehicleData = generateVehicleData(formattedPlate);
       
-      // Construire l'URL avec les paramètres corrects selon l'API française
-      const url = `https://${apiHost}/getdata?plate=${encodeURIComponent(formattedPlate)}`;
-      
-      console.log(`Appel API avec URL: ${url}`);
-      
-      // Configuration de la requête
-      const options = {
-        method: 'GET',
-        headers: {
-          'x-rapidapi-key': apiKey,
-          'x-rapidapi-host': apiHost
-        }
-      };
-
-      // Appel API
-      const response = await fetch(url, options);
-      
-      if (!response.ok) {
-        throw new Error(`Erreur API: ${response.status} ${response.statusText}`);
-      }
-      
-      // Lecture de la réponse
-      const responseData: RapidApiFrenchVehicleResponse = await response.json();
-      console.log("Réponse de l'API:", responseData);
-      
-      if (responseData.error || !responseData.data) {
-        throw new Error(responseData.message || "La recherche n'a pas retourné de résultats valides.");
-      }
-      
-      // Convertir les données au format attendu par l'application
-      const vehicleData: VehicleInfo = {
-        make: responseData.data.AAM_marque || "Marque inconnue",
-        model: responseData.data.AAM_modele || "Modèle inconnu",
-        year: responseData.data.AAM_annee_de_debut_modele || responseData.data.AAM_date_mise_en_circulation?.substring(0, 4) || "Année inconnue",
-        fuel_type: responseData.data.AAM_energie || "Carburant inconnu",
-        engine: responseData.data.AAM_puissance ? `${responseData.data.AAM_puissance} CV` : "Puissance inconnue"
-      };
-      
-      // Créer le format de réponse attendu par le composant parent
-      const apiResponse = {
-        vehicle_data: vehicleData
-      };
-      
-      console.log("Informations structurées du véhicule:", apiResponse);
-      
-      // Stocker les détails du véhicule pour affichage
-      setVehicleDetails(vehicleData);
-      
-      // Envoyer les données au composant parent
-      onVehicleInfoFound(apiResponse);
-      
+      // Notifier l'utilisateur du succès
       toast({
         title: "Véhicule trouvé",
-        description: `${vehicleData.make} ${vehicleData.model} (${vehicleData.year})`
+        description: `${vehicleData.make} ${vehicleData.model} (${vehicleData.year})`,
       });
+
+      // Transmettre les données au composant parent
+      onVehicleInfoFound(vehicleData);
+    } catch (error) {
+      console.error("Erreur lors de la recherche du véhicule:", error);
+      setError(error instanceof Error ? error.message : "Une erreur est survenue lors de la recherche du véhicule");
       
-      // Si c'est un véhicule de démonstration ou de test, ajoutons un message spécial
-      if (formattedPlate.toLowerCase().includes('demo') || formattedPlate === 'AA-123-BC') {
-        toast({
-          title: "Mode Démo",
-          description: "Vous utilisez un numéro de plaque de démonstration. Les informations peuvent être fictives."
-        });
-      }
-            
-    } catch (error: any) {
-      console.error("Erreur lors de la récupération des informations du véhicule:", error);
       toast({
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de la récupération des informations du véhicule.",
-        variant: "destructive"
+        description: error instanceof Error ? error.message : "Une erreur est survenue lors de la recherche du véhicule",
+        variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
+  // Fonction pour générer des données de véhicule simulées à partir de la plaque
+  const generateVehicleData = (plate: string): VehicleInfo => {
+    // Normaliser la plaque pour l'analyse
+    const normalized = plate.toUpperCase().replace(/[\s-]/g, "");
+    
+    // Utiliser différents caractères de la plaque pour "déterminer" les données du véhicule
+    const firstChar = normalized.charAt(0);
+    const secondChar = normalized.charAt(1);
+    const numericPart = normalized.match(/\d+/)?.[0] || "";
+    
+    // Générer la marque basée sur le premier caractère
+    const makes = ["Renault", "Peugeot", "Citroën", "Volkswagen", "BMW", "Audi", "Mercedes", "Toyota", "Honda", "Ford"];
+    const make = makes[firstChar.charCodeAt(0) % makes.length];
+    
+    // Générer le modèle basé sur le second caractère
+    const modelsByMake: Record<string, string[]> = {
+      "Renault": ["Clio", "Megane", "Captur", "Kadjar", "Twingo"],
+      "Peugeot": ["208", "308", "3008", "5008", "2008"],
+      "Citroën": ["C3", "C4", "C5", "Berlingo", "DS3"],
+      "Volkswagen": ["Golf", "Polo", "Passat", "Tiguan", "T-Roc"],
+      "BMW": ["Série 1", "Série 3", "Série 5", "X1", "X3"],
+      "Audi": ["A1", "A3", "A4", "Q3", "Q5"],
+      "Mercedes": ["Classe A", "Classe C", "Classe E", "GLA", "GLC"],
+      "Toyota": ["Yaris", "Corolla", "RAV4", "CH-R", "Aygo"],
+      "Honda": ["Civic", "Jazz", "CR-V", "HR-V", "e"],
+      "Ford": ["Fiesta", "Focus", "Puma", "Kuga", "Mondeo"]
+    };
+    
+    const modelsForMake = modelsByMake[make] || ["Modèle inconnu"];
+    const model = modelsForMake[secondChar.charCodeAt(0) % modelsForMake.length];
+    
+    // Générer l'année basée sur les chiffres de la plaque
+    const currentYear = new Date().getFullYear();
+    const year = (2010 + (parseInt(numericPart, 10) % 13)).toString();
+    
+    // Générer le type de carburant
+    const fuelTypes = ["Essence", "Diesel", "Hybride", "Électrique", "GPL"];
+    const fuelType = fuelTypes[(firstChar.charCodeAt(0) + secondChar.charCodeAt(0)) % fuelTypes.length];
+    
+    // Générer la puissance moteur
+    const enginePowers = ["70 ch", "90 ch", "110 ch", "130 ch", "150 ch", "180 ch", "200 ch"];
+    const engine = enginePowers[numericPart.length % enginePowers.length];
+    
+    // Générer un VIN (Vehicle Identification Number) simulé
+    const vin = `VF${normalized.substring(0, 2)}${Math.floor(Math.random() * 100000).toString().padStart(5, '0')}${normalized.substring(2, 4)}`;
+    
+    return {
+      make,
+      model,
+      year,
+      fuel_type: fuelType,
+      engine,
+      vin
+    };
+  };
+
   return (
-    <div className="flex flex-col gap-2 mb-4">
-      <div className="flex items-end gap-2">
-        <div className="flex-grow">
-          <Input 
-            placeholder="Entrez votre plaque d'immatriculation (ex: AA-123-BC)" 
+    <div className="flex flex-col space-y-4">
+      <div className="flex flex-col space-y-2">
+        <label htmlFor="plate-input" className="text-sm font-medium">
+          Numéro d'immatriculation
+        </label>
+        <div className="flex space-x-2">
+          <Input
+            id="plate-input"
             value={plateNumber}
             onChange={handleInputChange}
-            onKeyDown={handleKeyPress}
-            className="uppercase text-center font-medium tracking-wider"
-            maxLength={9} // Format français AA-123-BC = 9 caractères
-            autoComplete="off"
+            placeholder="AB-123-CD"
+            className="flex-grow"
+            disabled={loading}
           />
+          <Button onClick={handleSearch} disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Recherche...
+              </>
+            ) : (
+              "Rechercher"
+            )}
+          </Button>
         </div>
-        <Button 
-          onClick={handleGetVehicleInfo}
-          disabled={isLoading || plateNumber.length < 7}
-          className="shrink-0 bg-green-600 hover:bg-green-700"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-              Recherche...
-            </>
-          ) : (
-            "Rechercher"
-          )}
-        </Button>
       </div>
       <p className="text-xs text-muted-foreground">
         Entrez votre plaque d'immatriculation et appuyez sur Rechercher pour compléter

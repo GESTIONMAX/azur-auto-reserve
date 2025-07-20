@@ -27,8 +27,7 @@ Pour un déploiement réussi, définissez les variables d'environnement suivante
 |----------|-------------|------------------|
 | `VERIFY_JWT` | Vérifier les JWT sur les requêtes | `false` |
 | `DEBUG` | Activer le mode debug | `false` |
-| `RAPIDAPI_KEY` | Clé API pour RapidAPI (si utilisée) | - |
-| `RAPIDAPI_HOST` | Host pour RapidAPI (si utilisé) | - |
+
 | `SUPABASE_DB_URL` | URL de connexion à la base de données Supabase (rarement nécessaire) | - |
 
 ## Procédure de déploiement sur Coolify

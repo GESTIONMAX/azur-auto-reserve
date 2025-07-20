@@ -1,4 +1,4 @@
--- Create vehicle_info table for storing data from RapidAPI
+-- Create vehicle_info table for storing vehicle data
 CREATE TABLE IF NOT EXISTS public.vehicle_info (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     plate TEXT NOT NULL UNIQUE,
@@ -53,6 +53,6 @@ TO anon
 USING (true);
 
 -- Comment on table and columns
-COMMENT ON TABLE public.vehicle_info IS 'Stores vehicle information retrieved from RapidAPI';
+COMMENT ON TABLE public.vehicle_info IS 'Stores vehicle information';
 COMMENT ON COLUMN public.vehicle_info.plate IS 'Vehicle license plate (unique identifier)';
-COMMENT ON COLUMN public.vehicle_info.donnees_brutes IS 'Raw data returned from RapidAPI';
+COMMENT ON COLUMN public.vehicle_info.donnees_brutes IS 'Raw data of vehicle information';

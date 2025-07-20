@@ -27,12 +27,7 @@ Ces variables sont définies dans `docker-compose.edge-functions.yml` et sont in
 | `VERIFY_JWT` | Valider les JWT pour les requêtes aux edge functions | `false` |
 | `DEBUG` | Activer le mode débogage avec logs verbeux | `false` |
 
-### Variables RapidAPI pour le backend
 
-| Variable | Description | Exemple |
-|---------|-------------|---------|
-| `RAPIDAPI_KEY` | Clé API RapidAPI (sans préfixe VITE_) | `bea1499435...` |
-| `RAPIDAPI_HOST` | Hôte API RapidAPI (sans préfixe VITE_) | `api-de-plaque-d-immatriculation-france.p.rapidapi.com` |
 
 ## Configuration dans Coolify
 

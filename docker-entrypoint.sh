@@ -40,14 +40,7 @@ replace_env_vars() {
     echo "  NEXT_PUBLIC_SUPABASE_ANON_KEY: \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc1MjY2NTg4MCwiZXhwIjo0OTA4MzM5NDgwLCJyb2xlIjoiYW5vbiJ9.vzVhy6cNeBDLCWkAZCskjTS7m7VfkuUUELc5cOH_7as\"," >> "$ENV_CONFIG_FILE"
   fi
   
-  # RapidAPI
-  if [ ! -z "$VITE_RAPIDAPI_KEY" ]; then
-    echo "  VITE_RAPIDAPI_KEY: \"$VITE_RAPIDAPI_KEY\"," >> "$ENV_CONFIG_FILE"
-  fi
-  
-  if [ ! -z "$VITE_RAPIDAPI_HOST" ]; then
-    echo "  VITE_RAPIDAPI_HOST: \"$VITE_RAPIDAPI_HOST\"," >> "$ENV_CONFIG_FILE"
-  fi
+  # Configurations supplémentaires peuvent être ajoutées ici si nécessaire
   
   # Autres variables
   if [ ! -z "$VITE_PUBLIC_SITE_URL" ]; then

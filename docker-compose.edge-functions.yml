@@ -16,9 +16,7 @@ services:
       SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_SUPABASESERVICE_KEY}
       SUPABASE_DB_URL: postgresql://postgres:${SERVICE_PASSWORD_POSTGRES}@${POSTGRES_HOSTNAME:-supabase-db}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-postgres}
       VERIFY_JWT: ${FUNCTIONS_VERIFY_JWT:-false}
-      # Variables d'environnement RapidAPI
-      RAPIDAPI_KEY: ${RAPIDAPI_KEY}
-      RAPIDAPI_HOST: ${RAPIDAPI_HOST}
+      # Variables d'environnement supplémentaires peuvent être ajoutées ici
       # Paramètres de débogage
       DEBUG: ${DEBUG:-false}
     healthcheck:

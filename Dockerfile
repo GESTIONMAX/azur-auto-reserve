@@ -1,7 +1,5 @@
-# Stage 1: Build the application (full rebuild 20-07-2025 10:01)
+# Stage 1: Build the application
 FROM node:20-alpine as build
-
-# Ajout d'une étape de nettoyage pour garantir un build propre
 
 WORKDIR /app
 

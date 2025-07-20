@@ -16,9 +16,7 @@ services:
       SUPABASE_DB_URL: ${SUPABASE_DB_URL}
       # Paramètre pour vérifier JWT
       VERIFY_JWT: ${VERIFY_JWT:-false}
-      # Variables d'environnement RapidAPI (si nécessaires)
-      RAPIDAPI_KEY: ${RAPIDAPI_KEY:-}
-      RAPIDAPI_HOST: ${RAPIDAPI_HOST:-}
+      # Variables d'environnement supplémentaires peuvent être ajoutées ici
       # Paramètres de débogage
       DEBUG: ${DEBUG:-false}
     healthcheck:
