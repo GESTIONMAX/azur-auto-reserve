@@ -138,6 +138,106 @@ docker-compose up -d
 
 L'interface d'administration sera disponible sur http://localhost:3000
 
+### Intégration du décodeur VIN avec vindecoder.eu
+
+L'application intègre un service de recherche de véhicules par numéro VIN utilisant l'API vindecoder.eu. Cette fonctionnalité permet d'identifier automatiquement la marque, le modèle et l'année d'un véhicule à partir de son VIN.
+
+#### Architecture et sécurité
+
+L'intégration suit une architecture sécurisée en deux parties :
+
+1. **Backend (Edge Function Supabase)** : Gère l'authentification et les appels API sécurisés
+2. **Frontend (VehicleSelector)** : Interface utilisateur pour saisir le VIN et afficher les résultats
+
+Cette séparation garantit que les clés API sensibles restent sur le serveur.
+
+#### Edge Function Supabase
+
+L'Edge Function `vindecoder` (`/supabase/functions/vindecoder/index.ts`) gère :
+
+- **L'authentification sécurisée** : Clés API stockées dans les variables d'environnement Supabase
+- **Le calcul SHA1** : Génération du contrôle de somme selon les spécifications de vindecoder.eu
+- **Les appels API** : Requêtes vers l'API vindecoder.eu pour obtenir les informations du véhicule
+- **La normalisation des données** : Formatage des réponses pour le frontend
+
+##### Calcul SHA1 pour l'authentification
+
+```typescript
+function calculateControlSum(vin: string, id: string): string {
+  const data = `${vin}|${id}|${apiKey}|${secretKey}`;
+  const hash = createHash('sha1').update(data).toString();
+  return hash.substring(0, 10);
+}
+```
+
+Ce calcul suit la documentation de vindecoder.eu :
+1. Concaténation de VIN + ID + API_KEY + SECRET_KEY avec des pipes (`|`)
+2. Calcul du hash SHA1
+3. Extraction des 10 premiers caractères du hash
+
+#### Composant frontend VehicleSelector
+
+Le composant VehicleSelector (`/frontend/src/components/VehicleSelector.tsx`) intègre :
+
+- Un champ de saisie pour le VIN avec validation
+- Un bouton de recherche qui appelle l'Edge Function
+- Des indicateurs visuels pendant le chargement
+- L'affichage des erreurs éventuelles
+- Le remplissage automatique des sélecteurs (marque, modèle, année) avec les données trouvées
+
+#### Déploiement et configuration
+
+##### Pour l'auto-hébergement avec Coolify
+
+1. **Ajouter les variables d'environnement** dans votre configuration Coolify pour le service Edge Functions :
+   ```
+   VINDECODER_API_KEY=votre_clé_api
+   VINDECODER_SECRET_KEY=votre_clé_secrète
+   ```
+
+2. **Mettre à jour le fichier `docker-compose.edge-functions.yml`** pour inclure ces variables :
+   ```yaml
+   environment:
+     # Variables existantes...
+     # Variables pour vindecoder.eu
+     VINDECODER_API_KEY: ${VINDECODER_API_KEY}
+     VINDECODER_SECRET_KEY: ${VINDECODER_SECRET_KEY}
+   ```
+
+3. **Redéployer le service Edge Functions** dans Coolify :
+   - Accédez à votre tableau de bord Coolify
+   - Sélectionnez le service Edge Functions
+   - Cliquez sur "Redeploy" pour appliquer les modifications
+
+4. **Vérifier que le routage est correctement configuré** pour que les appels à `/functions/v1/vindecoder` soient dirigés vers le service Edge Functions
+
+##### Pour Supabase Cloud (méthode standard)
+
+1. **Configurer les variables d'environnement** dans Supabase :
+   ```
+   VINDECODER_API_KEY=votre_clé_api
+   VINDECODER_SECRET_KEY=votre_clé_secrète
+   ```
+
+2. **Déployer l'Edge Function** avec la CLI Supabase :
+   ```bash
+   supabase functions deploy vindecoder --project-ref <VOTRE_REF_PROJET>
+   ```
+
+3. **Activer CORS** pour permettre les appels depuis votre frontend :
+   ```bash
+   supabase functions cors set --config '{ "origin": ["*"], "credentials": false }' --function-name vindecoder
+   ```
+
+#### Flux d'utilisation
+
+1. L'utilisateur saisit un numéro VIN (minimum 10 caractères)
+2. Le frontend appelle l'Edge Function avec le VIN
+3. L'Edge Function calcule le SHA1 et fait les appels API
+4. Les données du véhicule sont retournées au frontend
+5. Les sélecteurs de marque/modèle/année sont automatiquement remplis
+6. L'utilisateur peut compléter le reste du formulaire
+
 ### Dockerisation de l'application React
 
 L'application peut être déployée via Docker pour un environnement de production :

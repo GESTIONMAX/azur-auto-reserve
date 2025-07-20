@@ -484,54 +484,21 @@ const ReservationForm = () => {
                 </h3>
                 
                 <div className="mb-6">
-                  <Label className="mb-2 block">Sélectionnez votre véhicule</Label>
+                  <Label className="mb-2 block flex items-center gap-1">Sélectionnez votre véhicule <span className="text-destructive">*</span></Label>
                   <VehicleSelector onVehicleInfoFound={(data) => {
                     setVehicleInfo(data);
-                    // Extraire et mettre à jour les informations du véhicule
-                    // Ces champs dépendent de la structure de la réponse de votre API
-                    if (data && data.vehicle_data) {
-                      const vehicleData = data.vehicle_data;
-                      setFormData(prev => ({
-                        ...prev,
-                        marque_vehicule: vehicleData.make || "",
-                        modele_vehicule: vehicleData.model || "",
-                        annee_vehicule: vehicleData.year?.toString() || "",
-                        // Si vous avez le VIN dans la réponse de l'API
-                        numero_vin: vehicleData.vin || ""
-                      }));
-                    }
+                    // Mettre à jour les informations du véhicule dans le formulaire
+                    setFormData(prev => ({
+                      ...prev,
+                      marque_vehicule: data.make || "",
+                      modele_vehicule: data.model || "",
+                      annee_vehicule: data.year?.toString() || "",
+                      // Conserver le VIN s'il est disponible
+                      numero_vin: data.vin || prev.numero_vin
+                    }));
                   }} />
                 </div>
                 
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="marque_vehicule">Marque *</Label>
-                    <Input
-                      id="marque_vehicule"
-                      required
-                      value={formData.marque_vehicule}
-                      onChange={(e) => handleInputChange("marque_vehicule", e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="modele_vehicule">Modèle *</Label>
-                    <Input
-                      id="modele_vehicule"
-                      required
-                      value={formData.modele_vehicule}
-                      onChange={(e) => handleInputChange("modele_vehicule", e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="annee_vehicule">Année *</Label>
-                    <Input
-                      id="annee_vehicule"
-                      required
-                      value={formData.annee_vehicule}
-                      onChange={(e) => handleInputChange("annee_vehicule", e.target.value)}
-                    />
-                  </div>
-                </div>
                 <div className="mt-4 space-y-2">
                   <Label htmlFor="numero_vin">Numéro VIN (facultatif)</Label>
                   <Input
