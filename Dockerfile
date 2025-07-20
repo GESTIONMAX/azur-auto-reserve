@@ -26,8 +26,11 @@ RUN echo "VITE_PUBLIC_SITE_URL=${VITE_PUBLIC_SITE_URL}" >> .env.production
 # Force Vite à utiliser le mode production
 ENV NODE_ENV=production
 
-# Build de l'application
+# Build de l'application (force rebuild 20-07-2025)
 RUN npm run build
+
+# Vérifier que les fichiers ont été générés
+RUN ls -la dist && echo "Build terminé avec succès"
 
 # Stage 2: Serve the application
 FROM nginx:alpine
