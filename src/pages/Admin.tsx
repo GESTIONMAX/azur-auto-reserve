@@ -42,7 +42,7 @@ const Admin = () => {
 
       if (savError) throw savError;
 
-      setReservations(reservationsData || []);
+      setReservations((reservationsData as any) || []);
       setDemandesSAV(savData || []);
     } catch (error) {
       toast({

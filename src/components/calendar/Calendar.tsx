@@ -42,30 +42,20 @@ const Calendar: React.FC<CalendarProps> = ({
       setError(null);
       
       try {
-        // Utiliser fetch direct avec l'API REST Supabase pour éviter les problèmes de types
-        const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/disponibilites`;
-        const apiKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+        // Utiliser le client Supabase au lieu de fetch direct
+        let query = supabase
+          .from('disponibilites')
+          .select('*');
         
-        // Construire les paramètres de requête
-        const params = new URLSearchParams();
         if (!isAdmin) {
-          params.append('statut', 'eq.disponible');
+          query = query.eq('statut', 'disponible');
         }
         
-        const response = await fetch(`${apiUrl}?${params.toString()}`, {
-          method: 'GET',
-          headers: {
-            'apikey': apiKey,
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        const { data, error } = await query;
         
-        if (!response.ok) {
-          throw new Error(`Erreur API: ${response.status}`);
+        if (error) {
+          throw new Error(`Erreur Supabase: ${error.message}`);
         }
-        
-        const data = await response.json();
         
         if (data && isMounted) {
           try {

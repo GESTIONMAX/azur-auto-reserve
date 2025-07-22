@@ -120,7 +120,7 @@ const VilleDetail: React.FC = () => {
                 Élimination du filtre à particules pour améliorer les performances et réduire les problèmes de régénération.
               </p>
               <p className="text-2xl font-bold text-blue-600">
-                {ville.prix_specifiques.suppression_fap}€
+                {(ville.prix_specifiques as any)?.suppression_fap || 'Sur devis'}€
               </p>
             </div>
 
@@ -130,7 +130,7 @@ const VilleDetail: React.FC = () => {
                 Suppression de la vanne EGR pour améliorer la combustion et la fiabilité du moteur.
               </p>
               <p className="text-2xl font-bold text-blue-600">
-                {ville.prix_specifiques.suppression_egr}€
+                {(ville.prix_specifiques as any)?.suppression_egr || 'Sur devis'}€
               </p>
             </div>
 
@@ -140,7 +140,7 @@ const VilleDetail: React.FC = () => {
                 Élimination du système AdBlue pour éviter les problèmes liés à ce système et réduire les coûts d'entretien.
               </p>
               <p className="text-2xl font-bold text-blue-600">
-                {ville.prix_specifiques.suppression_adblue}€
+                {(ville.prix_specifiques as any)?.suppression_adblue || 'Sur devis'}€
               </p>
             </div>
 
@@ -150,7 +150,7 @@ const VilleDetail: React.FC = () => {
                 Optimisation des paramètres moteur pour gagner en puissance et en couple tout en conservant la fiabilité d'origine.
               </p>
               <p className="text-2xl font-bold text-blue-600">
-                {ville.prix_specifiques.reprogrammation_stage1}€
+                {(ville.prix_specifiques as any)?.reprogrammation_stage1 || 'Sur devis'}€
               </p>
             </div>
           </div>
@@ -170,16 +170,16 @@ const VilleDetail: React.FC = () => {
           </h2>
 
           <p className="mb-4">
-            Notre équipe intervient dans toute la zone de {ville.points_interet.zone_intervention}.
+            Notre équipe intervient dans toute la zone de {(ville.points_interet as any)?.zone_intervention || ville.nom}.
           </p>
 
-          {ville.points_interet.garages_partenaires && ville.points_interet.garages_partenaires.length > 0 && (
+          {(ville.points_interet as any)?.garages_partenaires && (ville.points_interet as any)?.garages_partenaires.length > 0 && (
             <>
               <h3 className="text-xl font-semibold mt-6 mb-3">
                 Nos garages partenaires à {ville.nom}
               </h3>
               <ul className="list-disc pl-6 mb-8">
-                {ville.points_interet.garages_partenaires.map((garage, index) => (
+                {(ville.points_interet as any)?.garages_partenaires.map((garage: string, index: number) => (
                   <li key={index} className="mb-2">{garage}</li>
                 ))}
               </ul>
