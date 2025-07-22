@@ -78,72 +78,34 @@ const Index = () => {
       {/* Nos Forfaits */}
       <section id="forfaits" className="py-16">
         <div className="container mx-auto px-4">
-          <h3 className="text-3xl font-bold text-center mb-4">Nos Forfaits Diagnostic OBD</h3>
+          <h3 className="text-3xl font-bold text-center mb-4">Diagnostic OBD Professionnel</h3>
           <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-            Choisissez le forfait qui correspond à vos besoins. Tous nos forfaits incluent le déplacement à domicile.
+            Service complet de diagnostic automobile à domicile avec rapport détaillé et conseils personnalisés.
           </p>
           
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Forfait Essentiel */}
+          <div className="max-w-md mx-auto">
             <Card className="relative hover:shadow-lg transition-shadow border-t-4 border-t-primary">
               <CardHeader className="text-center pb-4">
-                <CardTitle className="text-xl mb-2">Essentiel</CardTitle>
+                <CardTitle className="text-2xl mb-2">Diagnostic Complet</CardTitle>
                 <div className="mb-4">
-                  <span className="text-4xl font-bold text-primary">99€</span>
+                  <span className="text-5xl font-bold text-primary">99€</span>
                   <span className="text-muted-foreground"> TTC</span>
                 </div>
-                <CardDescription>Pour un diagnostic rapide et efficace</CardDescription>
+                <CardDescription>Diagnostic professionnel avec déplacement inclus</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-center">
                     <Check className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
-                    <span>Lecture des codes défaut</span>
+                    <span>Lecture complète des codes défaut</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
+                    <span>Diagnostic multisystème avancé</span>
                   </li>
                   <li className="flex items-center">
                     <Check className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
                     <span>Effacement des voyants</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
-                    <span>Rapport de base</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
-                    <span>Conseil technique</span>
-                  </li>
-                </ul>
-                <Button 
-                  className="w-full"
-                  onClick={() => scrollToSection('reservation')}
-                >
-                  Choisir ce forfait
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Forfait Complet */}
-            <Card className="relative hover:shadow-lg transition-shadow border-t-4 border-t-secondary scale-105">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-secondary text-secondary-foreground px-4 py-1 rounded-full text-sm font-medium">
-                Populaire
-              </div>
-              <CardHeader className="text-center pb-4">
-                <CardTitle className="text-xl mb-2">Complet</CardTitle>
-                <div className="mb-4">
-                  <span className="text-4xl font-bold text-secondary">149€</span>
-                  <span className="text-muted-foreground"> TTC</span>
-                </div>
-                <CardDescription>Diagnostic approfondi avec analyse détaillée</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
-                    <span>Tout du forfait Essentiel</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
-                    <span>Diagnostic avancé multisystème</span>
                   </li>
                   <li className="flex items-center">
                     <Check className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
@@ -155,58 +117,19 @@ const Index = () => {
                   </li>
                   <li className="flex items-center">
                     <Check className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
-                    <span>Suivi post-diagnostic</span>
+                    <span>Conseils techniques personnalisés</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
+                    <span>Déplacement à domicile inclus</span>
                   </li>
                 </ul>
                 <Button 
                   className="w-full"
-                  variant="secondary"
+                  size="lg"
                   onClick={() => scrollToSection('reservation')}
                 >
-                  Choisir ce forfait
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Forfait Premium */}
-            <Card className="relative hover:shadow-lg transition-shadow border-t-4 border-t-accent">
-              <CardHeader className="text-center pb-4">
-                <CardTitle className="text-xl mb-2">Premium</CardTitle>
-                <div className="mb-4">
-                  <span className="text-4xl font-bold text-accent">199€</span>
-                  <span className="text-muted-foreground"> TTC</span>
-                </div>
-                <CardDescription>Service VIP avec accompagnement personnalisé</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
-                    <span>Tout du forfait Complet</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
-                    <span>Intervention prioritaire</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
-                    <span>Garantie étendue 1 an</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
-                    <span>Support téléphonique 6 mois</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
-                    <span>Diagnostic de contrôle gratuit</span>
-                  </li>
-                </ul>
-                <Button 
-                  className="w-full"
-                  variant="outline"
-                  onClick={() => scrollToSection('reservation')}
-                >
-                  Choisir ce forfait
+                  Réserver maintenant
                 </Button>
               </CardContent>
             </Card>
